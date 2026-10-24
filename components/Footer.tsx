@@ -2,9 +2,16 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
+  const pathname = usePathname();
+
+  // Sembunyikan Footer khusus untuk halaman under-construction atau login
+  if (pathname === '/under-construction' || pathname === '/login') {
+    return null;
+  }
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,15 +24,15 @@ export default function Footer() {
   return (
     <footer className="bg-[#0A0C10] text-gray-300 border-t border-white/10 pt-16 pb-8 text-sm">
       <div className="max-w-7xl mx-auto px-6">
-        
+
         {/* TOP SECTION: LOGO, DESKRIPSI & NAVIGASI LINK */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12">
-          
+
           {/* LOGO & DESKRIPSI BRAND */}
           <div className="lg:col-span-5 space-y-4">
             <Link href="/" className="inline-block group">
               <div className="bg-[#0A0C10] border border-white/10 px-4 py-2 rounded-md transition-all duration-300 group-hover:border-red-500/50">
-                  <img src="./images/logo/ICS-Logo.png" alt="Logo-ICS" className='w-12 h-12' />
+                <img src="./images/logo/ICS-Logo.png" alt="Logo-ICS" className='w-12 h-12' />
               </div>
             </Link>
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-md">
@@ -106,7 +113,7 @@ export default function Footer() {
 
         {/* MIDDLE SECTION: NEWSLETTER, KONTAK, & ALAMAT */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 py-4 items-start">
-          
+
           {/* STAY UPDATED / NEWSLETTER */}
           <div className="lg:col-span-6 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">STAY UPDATED</h4>
