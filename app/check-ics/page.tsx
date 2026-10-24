@@ -43,7 +43,7 @@ export default function CheckIcsPage() {
   return (
     <div className="bg-[#0A0C10] text-white min-h-screen pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-6 space-y-12">
-        
+
         {/* ========================================================================= */}
         {/* 1. HERO SEARCH HEADER                                                     */}
         {/* ========================================================================= */}
@@ -127,7 +127,7 @@ export default function CheckIcsPage() {
         {/* ========================================================================= */}
         {isSearched && !isNotFoundState && (
           <div className="space-y-6 animate-fadeIn">
-            
+
             {/* Status Banner */}
             <div className="bg-[#12151C] border border-emerald-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
               <div className="flex items-center gap-3">
@@ -156,28 +156,26 @@ export default function CheckIcsPage() {
             {/* Main Result Card */}
             <div className="bg-[#12151C] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
+
                 {/* Left Column: Card Photos with Tab Switch */}
                 <div className="lg:col-span-5 space-y-4">
                   {/* Image Tab Switcher */}
                   <div className="flex items-center gap-2 bg-[#15181F] p-1 rounded-xl border border-white/5">
                     <button
                       onClick={() => setActiveTab('front')}
-                      className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
-                        activeTab === 'front'
-                          ? 'bg-red-600 text-white'
-                          : 'text-gray-400 hover:text-white'
-                      }`}
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${activeTab === 'front'
+                        ? 'bg-red-600 text-white'
+                        : 'text-gray-400 hover:text-white'
+                        }`}
                     >
                       Tampak Depan
                     </button>
                     <button
                       onClick={() => setActiveTab('back')}
-                      className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
-                        activeTab === 'back'
-                          ? 'bg-red-600 text-white'
-                          : 'text-gray-400 hover:text-white'
-                      }`}
+                      className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${activeTab === 'back'
+                        ? 'bg-red-600 text-white'
+                        : 'text-gray-400 hover:text-white'
+                        }`}
                     >
                       Tampak Belakang
                     </button>
@@ -217,7 +215,7 @@ export default function CheckIcsPage() {
 
                 {/* Right Column: Verified Specifications */}
                 <div className="lg:col-span-7 space-y-6">
-                  
+
                   {/* Title & Collection Name */}
                   <div className="space-y-1.5 border-b border-white/5 pb-5">
                     <span className="text-[10px] font-mono font-bold text-red-500 uppercase tracking-widest">
@@ -339,7 +337,7 @@ export default function CheckIcsPage() {
                   </div>
 
                   {/* Owner Collector Badge */}
-                  <div className="flex items-center justify-between p-3.5 bg-[#15181F] border border-white/5 rounded-2xl text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-2 items-center justify-between p-3.5 bg-[#15181F] border border-white/5 rounded-2xl text-xs">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-red-600/20 text-red-500 font-bold flex items-center justify-center">
                         K
@@ -351,7 +349,7 @@ export default function CheckIcsPage() {
                     </div>
                     <Link
                       href="/registry/user/kyoto"
-                      className="text-red-400 hover:text-red-300 font-bold flex items-center gap-1 text-[11px]"
+                      className="text-red-400 hover:text-red-300 font-bold flex items-center gap-1 text-[11px] mt-4 md:mt-0 justify-end"
                     >
                       Lihat Koleksi di Registry <ExternalLink className="w-3.5 h-3.5" />
                     </Link>

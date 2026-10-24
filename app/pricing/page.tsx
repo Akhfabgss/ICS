@@ -51,7 +51,7 @@ export default function PricingPage() {
   return (
     <div className="bg-[#0A0C10] text-white min-h-screen pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-6 space-y-16">
-        
+
         {/* ========================================================================= */}
         {/* 1. HERO HEADER                                                            */}
         {/* ========================================================================= */}
@@ -72,36 +72,37 @@ export default function PricingPage() {
         {/* ========================================================================= */}
         {/* 2. CATEGORY TABS (TCG ACTIVE, OTHERS DISABLED)                            */}
         {/* ========================================================================= */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-none">
-          {categories.map((cat) => {
-            const IconComp = cat.icon;
-            return (
-              <button
-                key={cat.id}
-                disabled={!cat.active}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                  cat.active
-                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 cursor-default'
-                    : 'bg-[#12151C] border border-white/5 text-gray-500 cursor-not-allowed opacity-60'
-                }`}
-              >
-                <IconComp className="w-4 h-4" />
-                <span>{cat.label}</span>
-                {!cat.active && (
-                  <span className="text-[9px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded uppercase font-semibold">
-                    Soon
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <div className="w-full overflow-x-auto pb-3 pt-1 no-scrollbar [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center justify-start sm:justify-center gap-2 sm:gap-3 min-w-max px-4">
+            {categories.map((cat) => {
+              const IconComp = cat.icon;
+              return (
+                <button
+                  key={cat.id}
+                  disabled={!cat.active}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${cat.active
+                      ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 cursor-default'
+                      : 'bg-[#12151C] border border-white/5 text-gray-500 cursor-not-allowed opacity-60'
+                    }`}
+                >
+                  <IconComp className="w-4 h-4" />
+                  <span>{cat.label}</span>
+                  {!cat.active && (
+                    <span className="text-[9px] bg-white/5 text-gray-500 px-1.5 py-0.5 rounded uppercase font-semibold">
+                      Soon
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ========================================================================= */}
         {/* 3. PRICING CARDS GRID (CLEAN & REFINED)                                   */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          
+
           {/* TIER 1: FOUNDER'S BATCH */}
           <div className="bg-[#12151C] border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col justify-between hover:border-white/20 transition-all duration-200">
             <div>
@@ -155,9 +156,9 @@ export default function PricingPage() {
 
           {/* TIER 2: STANDARD (FEATURED) */}
           <div className="bg-[#12151C] border-2 border-red-500/70 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl shadow-red-950/30 hover:border-red-500 transition-all duration-200">
-            
+
             {/* Featured Badge */}
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-0.5 rounded-full shadow-md">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-0.5 rounded-full shadow-md text-center">
               RECOMMENDED / UTAMA
             </div>
 
@@ -328,9 +329,8 @@ export default function PricingPage() {
                   >
                     <span>{faq.q}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${
-                        isOpen ? 'rotate-180 text-red-500' : ''
-                      }`}
+                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-red-500' : ''
+                        }`}
                     />
                   </button>
                   {isOpen && (
@@ -348,7 +348,7 @@ export default function PricingPage() {
         {/* 6. CALL TO ACTION BANNER                                                  */}
         {/* ========================================================================= */}
         <div className="bg-[#12151C] border border-white/10 rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
-          
+
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[220px] bg-red-600/10 blur-[100px] pointer-events-none rounded-full" />
 
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
@@ -382,17 +382,17 @@ export default function PricingPage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-gray-500 pt-4">
-            <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-red-500" /> Asuransi Pengiriman Aman Brinks
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-red-500" /> Ultrasonic Tamper-Proof Enclosure
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
                 <Database className="w-3.5 h-3.5 text-red-500" /> Rekam Jejak Permanen
-            </span>
+              </span>
             </div>
           </div>
 
