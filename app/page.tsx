@@ -56,12 +56,12 @@ export default function Home() {
   ];
   return (
     <div className="bg-[#0A0C10] text-white min-h-screen overflow-x-hidden pt-24 pb-16">
-      
+
       {/* ========================================================================= */}
       {/* 1. HERO SECTION WITH FLOATING CARDS                                       */}
       {/* ========================================================================= */}
       <section className="relative max-w-7xl mx-auto px-6 pt-12 pb-20 text-center flex flex-col items-center justify-center min-h-[85vh]">
-        
+
         {/* BACKGROUND GLOW EFFECT */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-red-900/15 blur-[140px] rounded-full pointer-events-none" />
 
@@ -111,7 +111,7 @@ export default function Home() {
 
         {/* HERO CONTENT */}
         <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-          
+
           {/* Tagline Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#15181F] border border-white/10 text-[11px] font-semibold text-gray-300 tracking-widest uppercase">
             INDONESIA COLLECTIBLES STANDAR
@@ -138,10 +138,10 @@ export default function Home() {
       {/* 2. STATS & INDICATORS SECTION                                             */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-6 py-8">
-        
+
         {/* STATS CARDS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          
+
           {/* Stat 1 */}
           <div className="bg-[#12151C] border border-white/10 hover:border-red-500/40 rounded-2xl p-6 transition-all duration-300 hover:translate-y-[-2px] group">
             <p className="text-3xl sm:text-4xl font-extrabold text-red-500 group-hover:text-red-400 transition-colors">
@@ -200,14 +200,14 @@ export default function Home() {
       {/* ========================================================================= */}
       {/* 3. ECOSYSTEM ARCHITECTURE SECTION (FULL RIGHT EDGE IMAGE)                  */}
       {/* ========================================================================= */}
-      <section className="w-full px-6 pt-20 pb-12 overflow-hidden">
-        
+      <section className="w-full pt-20 pb-12 overflow-hidden">
+
         {/* Container Split: Left Padding Standard, Right Edge Full W-Full */}
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 pl-6 sm:pl-12 lg:pl-20 xl:pl-32 pr-0">
-          
+
           {/* LEFT COLUMN: FEATURES & CTA */}
-          <div className="w-full lg:w-1/2 max-w-xl space-y-8 pr-6 lg:pr-0">
-            
+          <div className="w-full lg:w-1/2 max-w-xl space-y-8 pr-6 lg:pr-0 px-6">
+
             {/* Section Tagline */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-red-950/40 border border-red-500/30 text-[11px] font-bold text-red-400 uppercase tracking-widest">
               <Landmark className="w-3.5 h-3.5 text-red-400" /> END-TO-END COLLECTOR ARCHITECTURE
@@ -224,7 +224,7 @@ export default function Home() {
 
             {/* FEATURE LIST WITH LUCIDE ICONS */}
             <div className="space-y-6 pt-2">
-              
+
               {/* Feature 1 */}
               <div className="flex items-start gap-4 group">
                 <div className="mt-1">
@@ -308,7 +308,7 @@ export default function Home() {
             <div className="relative w-full max-w-[850px] flex justify-end">
               {/* Subtle Red Glow behind Image */}
               <div className="absolute inset-0 bg-red-600/10 blur-3xl rounded-full pointer-events-none" />
-              
+
               {/* Showcase Image - Bleeds directly to the right viewport border */}
               <Image
                 src="/images/home/about.png"
@@ -329,7 +329,7 @@ export default function Home() {
       {/* SECTION 1: CARA KERJA ICS (CERTIFIED GRADING PIPELINE)                    */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-6 py-20 border-t border-white/5">
-        
+
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
@@ -347,10 +347,10 @@ export default function Home() {
 
         {/* INTERACTIVE PIPELINE STEPS */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          
+
           {/* STEP CARD DISPLAY */}
           <div className="lg:col-span-7 bg-[#12151C] border border-white/10 rounded-2xl p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden group">
-            
+
             {/* Background Accent Glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 blur-3xl rounded-full pointer-events-none group-hover:bg-red-600/20 transition-all duration-500" />
 
@@ -402,18 +402,16 @@ export default function Home() {
                 <button
                   key={idx}
                   onClick={() => setActiveStep(idx)}
-                  className={`flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 ${
-                    isActive
+                  className={`flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 ${isActive
                       ? 'bg-[#15181F] border-red-500/50 shadow-lg shadow-red-950/30'
                       : 'bg-[#12151C]/60 border-white/5 hover:border-white/20 text-gray-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <div
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm ${
-                      isActive
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm ${isActive
                         ? 'bg-red-600 text-white'
                         : 'bg-white/5 text-gray-400'
-                    }`}
+                      }`}
                   >
                     {step.num}
                   </div>
@@ -436,7 +434,7 @@ export default function Home() {
       {/* SECTION 2: KATEGORI KOLEKSI (ECOSYSTEM EXPANSION)                          */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-6 py-20 border-t border-white/5">
-        
+
         {/* HEADER SECTION */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <span className="text-xs font-bold text-red-500 uppercase tracking-widest">
@@ -452,7 +450,7 @@ export default function Home() {
 
         {/* 3 CATEGORY CARDS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
+
           {/* CARD 1: TCG & TRADING CARDS (ACTIVE) */}
           <div className="bg-[#12151C] border-2 border-red-500/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl shadow-red-950/20 group hover:border-red-500 transition-all duration-300">
             <div>
@@ -593,12 +591,12 @@ export default function Home() {
       {/* SECTION 3: FINAL CALL TO ACTION BANNER                                    */}
       {/* ========================================================================= */}
       <section className="relative max-w-7xl mx-auto px-6 py-24 text-center border-t border-white/5">
-        
+
         {/* Background Glow Effect */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-red-600/15 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto space-y-8">
-          
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#15181F] border border-white/10 text-[11px] font-bold text-red-400 uppercase tracking-widest">
             <ShieldAlert className="w-3.5 h-3.5 text-red-500" /> JOIN THE STANDARD OF COLLECTORS
