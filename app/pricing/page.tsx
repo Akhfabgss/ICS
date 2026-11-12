@@ -372,7 +372,7 @@ export default function PricingPage() {
                 Daftar Sekarang
               </Link>
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/625693228743"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto bg-[#15181F] hover:bg-white/10 border border-white/10 text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all"

@@ -460,7 +460,7 @@ export default function Home() {
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <span className="text-[10px] font-bold tracking-widest uppercase bg-red-600 text-white px-2.5 py-1 rounded-full shadow-md">
-                  ● ACTIVE / PRIORITY
+                   ACTIVE / PRIORITY
                 </span>
               </div>
 

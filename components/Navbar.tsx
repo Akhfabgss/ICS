@@ -36,7 +36,7 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Service', href: '/services' },
     { name: 'Pricing', href: '/pricing' },
-    { name: 'Set Registry', href: '/under-construction' },
+    { name: 'Set Registry', href: '/set-registry' },
     { name: 'Grading Standar', href: '/grading-standar' },
     { name: 'Check ICS', href: '/check-ics' },
     { name: 'Contact', href: '/contact' },
@@ -45,8 +45,8 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isMobileMenuOpen
-          ? 'bg-[#15181F]/95 backdrop-blur-md shadow-lg border-b border-white/5 py-3'
-          : 'bg-transparent py-5'
+        ? 'bg-[#15181F]/95 backdrop-blur-md shadow-lg border-b border-white/5 py-3'
+        : 'bg-transparent py-5'
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
@@ -66,8 +66,8 @@ export default function Navbar() {
                 key={idx}
                 href={item.href}
                 className={`relative text-sm font-medium transition-all duration-200 py-1 ${isActive
-                    ? 'text-white font-semibold'
-                    : 'text-gray-300 hover:text-red-500'
+                  ? 'text-white font-semibold'
+                  : 'text-gray-300 hover:text-red-500'
                   }`}
               >
                 {item.name}
@@ -116,8 +116,8 @@ export default function Navbar() {
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all ${isActive
-                      ? 'bg-red-600/20 text-red-400 border border-red-500/30'
-                      : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                    ? 'bg-red-600/20 text-red-400 border border-red-500/30'
+                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
                     }`}
                 >
                   <span>{item.name}</span>

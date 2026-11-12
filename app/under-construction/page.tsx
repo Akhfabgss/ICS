@@ -39,7 +39,7 @@ export default function UnderConstructionPage() {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/625693228743"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white font-bold text-xs sm:text-sm px-7 py-3.5 rounded-xl shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -61,7 +61,7 @@ export default function UnderConstructionPage() {
               <p>
                 Perlu verifikasi keaslian darurat? Hubungi WhatsApp resmi Tim Sertifikasi ICS:{' '}
                 <a
-                  href="https://wa.me/6281234567890"
+                  href="https://wa.me/625693228743"
                   className="font-mono font-bold text-white underline hover:text-red-400 transition-colors"
                 >
                   0812-ICS-AUTH

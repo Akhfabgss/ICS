@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
   Search,
-  QrCode,
   ShieldCheck,
   CheckCircle2,
   Share2,
@@ -16,17 +15,26 @@ import {
   Camera,
   ExternalLink,
   RotateCcw,
+  ScanLine,
+  Cpu,
+  FileCheck2,
 } from 'lucide-react';
 
 export default function CheckIcsPage() {
-  const [certInput, setCertInput] = useState('ICS-TR-026184');
+  const [certInput, setCertInput] = useState('');
   const [activeTab, setActiveTab] = useState<'front' | 'back'>('front');
-  const [isSearched, setIsSearched] = useState(true);
+  const [isSearched, setIsSearched] = useState(false);
   const [isNotFoundState, setIsNotFoundState] = useState(false);
+  const [activeCert, setActiveCert] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (certInput.trim().toUpperCase() === 'NOTFOUND' || certInput.trim().toUpperCase() === 'INVALID') {
+    if (!certInput.trim()) return;
+
+    const formattedInput = certInput.trim().toUpperCase();
+    setActiveCert(formattedInput);
+
+    if (formattedInput === 'NOTFOUND' || formattedInput === 'INVALID') {
       setIsNotFoundState(true);
     } else {
       setIsNotFoundState(false);
@@ -36,8 +44,20 @@ export default function CheckIcsPage() {
 
   const fillPopularCert = (code: string) => {
     setCertInput(code);
-    setIsNotFoundState(false);
+    setActiveCert(code);
+    if (code === 'NOTFOUND') {
+      setIsNotFoundState(true);
+    } else {
+      setIsNotFoundState(false);
+    }
     setIsSearched(true);
+  };
+
+  const resetSearch = () => {
+    setIsSearched(false);
+    setIsNotFoundState(false);
+    setCertInput('');
+    setActiveCert('');
   };
 
   return (
@@ -58,7 +78,7 @@ export default function CheckIcsPage() {
           </h1>
 
           <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-            Masukkan Nomor Sertifikat ICS atau gunakan pemindai QR untuk membuka laporan pemeriksaan resmi dan rekam jejak aset terenkripsi.
+            Masukkan Nomor Sertifikat ICS atau gunakan pemindai QR/NFC untuk membuka laporan pemeriksaan resmi dan rekam jejak aset terenkripsi.
           </p>
         </div>
 
@@ -87,7 +107,7 @@ export default function CheckIcsPage() {
 
               <button
                 type="button"
-                onClick={() => alert('Membuka Kamera Pemindai QR... (Gunakan smartphone untuk NFC Tap)')}
+                onClick={() => alert('Membuka Kamera Pemindai QR... (Gunakan smartphone untuk Tap NFC)')}
                 className="bg-[#15181F] hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-xs sm:text-sm p-3.5 rounded-xl flex items-center justify-center transition-all"
                 title="Scan QR Code via Kamera"
               >
@@ -101,18 +121,21 @@ export default function CheckIcsPage() {
             <span className="text-gray-500 font-medium">Contoh Demo ID:</span>
             <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={() => fillPopularCert('ICS-TR-026184')}
                 className="text-[11px] font-mono text-gray-300 hover:text-white bg-[#15181F] px-2.5 py-1 rounded-md border border-white/5 hover:border-red-500/40 transition-colors"
               >
                 ICS-TR-026184 (Pokémon)
               </button>
               <button
+                type="button"
                 onClick={() => fillPopularCert('ICS-AF-009120')}
                 className="text-[11px] font-mono text-gray-300 hover:text-white bg-[#15181F] px-2.5 py-1 rounded-md border border-white/5 hover:border-red-500/40 transition-colors"
               >
                 ICS-AF-009120 (One Piece)
               </button>
               <button
+                type="button"
                 onClick={() => fillPopularCert('NOTFOUND')}
                 className="text-[11px] font-mono text-rose-400 hover:text-rose-300 bg-rose-950/30 px-2.5 py-1 rounded-md border border-rose-500/30 transition-colors"
               >
@@ -123,10 +146,73 @@ export default function CheckIcsPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. SEARCH RESULT: VERIFIED RECORD FOUND STATE                             */}
+        {/* 2. INITIAL PLACEHOLDER STATE (SEBELUM CARI / SCAN)                        */}
+        {/* ========================================================================= */}
+        {!isSearched && (
+          <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
+            {/* Visual Scanner Illustration Card */}
+            <div className="bg-[#12151C] border border-white/10 rounded-3xl p-8 text-center relative overflow-hidden shadow-2xl">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/10 blur-[120px] pointer-events-none rounded-full" />
+
+              <div className="relative z-10 space-y-6 max-w-xl mx-auto">
+                <div className="relative w-28 h-28 mx-auto flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-red-600/10 border border-red-500/30 animate-ping" />
+                  <div className="w-24 h-24 rounded-full bg-[#15181F] border border-white/10 flex items-center justify-center shadow-xl">
+                    <ScanLine className="w-10 h-10 text-red-500 animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-white">
+                    Siap Memeriksa Keaslian Koleksimu
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                    Ketik ID Sertifikat di kolom atas atau pemindai chip NFC / QR Code pada slab akrilik ICS untuk mendapatkan data forensik real-time.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Steps Guide Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-[#12151C] border border-white/5 rounded-2xl p-5 space-y-2">
+                <div className="p-2.5 rounded-xl bg-[#15181F] border border-white/10 text-red-500 w-fit">
+                  <ScanLine className="w-5 h-5" />
+                </div>
+                <h4 className="text-xs font-bold text-white">1. Scan QR atau Tap NFC</h4>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Tempelkan smartphone pada label slab ICS atau scan QR Code unik yang tertera di sertifikat fisik.
+                </p>
+              </div>
+
+              <div className="bg-[#12151C] border border-white/5 rounded-2xl p-5 space-y-2">
+                <div className="p-2.5 rounded-xl bg-[#15181F] border border-white/10 text-red-500 w-fit">
+                  <Cpu className="w-5 h-5" />
+                </div>
+                <h4 className="text-xs font-bold text-white">2. Dekripsi Ledger Digital</h4>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Sistem langsung mengotentikasi kecocokan tanda tangan kriptografi dengan database pusat ICS.
+                </p>
+              </div>
+
+              <div className="bg-[#12151C] border border-white/5 rounded-2xl p-5 space-y-2">
+                <div className="p-2.5 rounded-xl bg-[#15181F] border border-white/10 text-red-500 w-fit">
+                  <FileCheck2 className="w-5 h-5" />
+                </div>
+                <h4 className="text-xs font-bold text-white">3. Tampilan Hasil Forensik</h4>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Dapatkan transparansi 4 parameter sub-grades, foto resolusi tinggi, dan status enkapsulasi.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* 3. SEARCH RESULT: VERIFIED RECORD FOUND STATE                             */}
         {/* ========================================================================= */}
         {isSearched && !isNotFoundState && (
-          <div className="space-y-6 animate-fadeIn">
+          <div className="space-y-6 animate-fadeIn max-w-5xl mx-auto">
 
             {/* Status Banner */}
             <div className="bg-[#12151C] border border-emerald-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
@@ -147,9 +233,19 @@ export default function CheckIcsPage() {
                 </div>
               </div>
 
-              <div className="text-right text-xs text-gray-400 font-mono self-end sm:self-auto">
-                <span className="block text-[10px] text-gray-500 uppercase">Terakhir Di-audit</span>
-                <span className="text-white font-semibold">21 OKTOBER 2026, 15:19 WIB</span>
+              <div className="flex items-center gap-3">
+                <div className="text-right text-xs text-gray-400 font-mono">
+                  <span className="block text-[10px] text-gray-500 uppercase">Terakhir Di-audit</span>
+                  <span className="text-white font-semibold">21 OKTOBER 2026, 15:19 WIB</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={resetSearch}
+                  className="p-2 bg-[#15181F] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white rounded-xl transition-colors"
+                  title="Cari Lagi"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
@@ -162,6 +258,7 @@ export default function CheckIcsPage() {
                   {/* Image Tab Switcher */}
                   <div className="flex items-center gap-2 bg-[#15181F] p-1 rounded-xl border border-white/5">
                     <button
+                      type="button"
                       onClick={() => setActiveTab('front')}
                       className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${activeTab === 'front'
                         ? 'bg-red-600 text-white'
@@ -171,6 +268,7 @@ export default function CheckIcsPage() {
                       Tampak Depan
                     </button>
                     <button
+                      type="button"
                       onClick={() => setActiveTab('back')}
                       className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${activeTab === 'back'
                         ? 'bg-red-600 text-white'
@@ -196,7 +294,7 @@ export default function CheckIcsPage() {
                     />
 
                     <div className="absolute bottom-3 left-3 right-3 bg-[#15181F]/90 backdrop-blur-md border border-white/10 rounded-xl p-2.5 flex items-center justify-between text-[11px]">
-                      <span className="font-mono text-gray-400">CERT: {certInput}</span>
+                      <span className="font-mono text-gray-400">CERT: {activeCert}</span>
                       <span className="text-emerald-400 flex items-center gap-1 font-semibold">
                         <Lock className="w-3 h-3" /> SONIC SEALED
                       </span>
@@ -252,7 +350,7 @@ export default function CheckIcsPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div className="bg-[#15181F] border border-white/5 rounded-xl p-3">
                       <span className="text-gray-500 text-[10px] block uppercase font-mono">NOMOR SERTIFIKAT</span>
-                      <span className="font-bold font-mono text-white mt-0.5 block">{certInput}</span>
+                      <span className="font-bold font-mono text-white mt-0.5 block truncate">{activeCert}</span>
                     </div>
                     <div className="bg-[#15181F] border border-white/5 rounded-xl p-3">
                       <span className="text-gray-500 text-[10px] block uppercase font-mono">TANGGAL GRADING</span>
@@ -348,7 +446,7 @@ export default function CheckIcsPage() {
                       </div>
                     </div>
                     <Link
-                      href="/registry/user/kyoto"
+                      href="/under-construction"
                       className="text-red-400 hover:text-red-300 font-bold flex items-center gap-1 text-[11px] mt-4 md:mt-0 justify-end"
                     >
                       Lihat Koleksi di Registry <ExternalLink className="w-3.5 h-3.5" />
@@ -363,6 +461,7 @@ export default function CheckIcsPage() {
             {/* Action Buttons Bar */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <button
+                type="button"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
                   alert('Tautan rekam jejak digital berhasil disalin!');
@@ -380,7 +479,7 @@ export default function CheckIcsPage() {
               </a>
 
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/625693228743"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 font-bold text-xs px-5 py-3 rounded-xl flex items-center gap-2 transition-all"
@@ -393,10 +492,10 @@ export default function CheckIcsPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* 3. SEARCH RESULT: NOT FOUND / INVALID STATE                               */}
+        {/* 4. SEARCH RESULT: NOT FOUND / INVALID STATE                               */}
         {/* ========================================================================= */}
         {isSearched && isNotFoundState && (
-          <div className="bg-[#12151C] border border-rose-500/50 rounded-3xl p-8 text-center space-y-6 max-w-2xl mx-auto shadow-2xl animate-fadeIn">
+          <div className="bg-[#12151C] border border-rose-500/50 rounded-3xl p-8 text-center space-y-6 max-w-4xl mx-auto shadow-2xl animate-fadeIn">
             <div className="w-16 h-16 mx-auto rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-500">
               <AlertTriangle className="w-8 h-8" />
             </div>
@@ -420,16 +519,14 @@ export default function CheckIcsPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
-                onClick={() => {
-                  setCertInput('ICS-TR-026184');
-                  setIsNotFoundState(false);
-                }}
+                type="button"
+                onClick={resetSearch}
                 className="w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" /> Coba Cari ID Lain
               </button>
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/625693228743"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto bg-[#15181F] hover:bg-white/10 border border-white/10 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all"

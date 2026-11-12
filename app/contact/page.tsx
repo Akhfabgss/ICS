@@ -85,8 +85,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="text-gray-400 text-[10px] block uppercase font-mono">Layanan WhatsApp & Hotline</span>
-                    <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-red-400 transition-colors">
-                      +62 812-3456-7890
+                    <a href="https://wa.me/625693228743" target="_blank" rel="noopener noreferrer" className="font-bold text-white hover:text-red-400 transition-colors">
+                      +62 856-9322-8743
                     </a>
                     <p className="text-[11px] text-gray-500 mt-0.5">Respons cepat jam 09:00 - 18:00 WIB</p>
                   </div>
@@ -99,8 +99,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="text-gray-400 text-[10px] block uppercase font-mono">Email Resmi Support</span>
-                    <a href="mailto:support@ics.id" className="font-bold text-white hover:text-red-400 transition-colors">
-                      support@ics.id
+                    <a href="mailto:ics.official.registry@gmail.com" className="font-bold text-white hover:text-red-400 transition-colors">
+                      ics.official.registry@gmail.com
                     </a>
                     <p className="text-[11px] text-gray-500 mt-0.5">Untuk pertanyaan kemitraan & bulk submission</p>
                   </div>
@@ -138,7 +138,6 @@ export default function ContactPage() {
             {/* Direct WhatsApp CS Banner */}
             <div className="bg-gradient-to-r from-emerald-950/40 to-[#12151C] border border-emerald-500/30 rounded-2xl p-6 space-y-3 shadow-xl">
               <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 CUSTOMER SERVICE FAST RESPONSE
               </div>
               <h4 className="text-base font-extrabold text-white">
@@ -148,7 +147,7 @@ export default function ContactPage() {
                 Langsung terhubung dengan Tim Support ICS via WhatsApp untuk estimasi grade awal atau status pengiriman kartu.
               </p>
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/625693228743"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-3 rounded-xl inline-flex items-center gap-2 transition-all shadow-lg shadow-emerald-950/50"
@@ -294,38 +293,27 @@ export default function ContactPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             
             {/* Hub 1 */}
             <div className="bg-[#15181F] border border-white/5 rounded-2xl p-5 space-y-2">
               <div className="flex items-center gap-2 text-red-500 font-bold">
-                <Building2 className="w-4 h-4" /> Hub Utama Jakarta
+                <Building2 className="w-4 h-4" /> Hub Utama Bogor
               </div>
-              <p className="text-gray-300 font-semibold">Gedung Pusat Koleksi Indonesia</p>
+              <p className="text-gray-300 font-semibold">Jl. Ps. Hewan No.75, RT.01/RW.06, Tanah Sareal, Kota Bogor, Jawa Barat 16162</p>
               <p className="text-gray-500 leading-relaxed">
-                Jakarta Selatan, DKI Jakarta. Menerima pengiriman ekspedisi paket kilat.
+                Tanah Sareal, Kota Bogor. Menerima pengiriman ekspedisi paket kilat.
               </p>
             </div>
 
             {/* Hub 2 */}
             <div className="bg-[#15181F] border border-white/5 rounded-2xl p-5 space-y-2">
               <div className="flex items-center gap-2 text-red-500 font-bold">
-                <Building2 className="w-4 h-4" /> Hub Regional Bandung
+                <Building2 className="w-4 h-4" /> Hub Regional Jakarta
               </div>
-              <p className="text-gray-300 font-semibold">Drop Point Komunitas TCG Bandung</p>
+              <p className="text-gray-300 font-semibold">Jl. Kudus No.8, RT.7/RW.6, Dukuh Atas, Menteng, Kota Jakarta Pusat, DKI Jakarta 10310</p>
               <p className="text-gray-500 leading-relaxed">
-                Kota Bandung, Jawa Barat. Penyerahan kartu langsung setiap akhir pekan.
-              </p>
-            </div>
-
-            {/* Hub 3 */}
-            <div className="bg-[#15181F] border border-white/5 rounded-2xl p-5 space-y-2">
-              <div className="flex items-center gap-2 text-red-500 font-bold">
-                <Building2 className="w-4 h-4" /> Hub Regional Surabaya
-              </div>
-              <p className="text-gray-300 font-semibold">Drop Point Jawa Timur</p>
-              <p className="text-gray-500 leading-relaxed">
-                Surabaya, Jawa Timur. Layanan penerimaan barang koleksi regional timur.
+                Menteng, DKI Jakarta. Penyerahan kartu langsung setiap akhir pekan.
               </p>
             </div>
 

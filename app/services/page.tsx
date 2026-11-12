@@ -107,10 +107,10 @@ export default function ServicesPage() {
             <div className="flex items-center justify-between text-xs text-gray-400 mb-2 font-medium">
               <span className="uppercase tracking-widest text-[10px] text-gray-400">SIKLUS PENGERJAAN AKTIF</span>
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ON SCHEDULE
+                ON SCHEDULE
               </span>
             </div>
-            <p className="text-2xl font-extrabold text-white">5 - 10 Hari Kerja</p>
+            <p className="text-2xl font-extrabold text-white">7 - 14 Hari Kerja</p>
             <p className="text-xs text-gray-500 mt-1">Tier Express & Regular menerima submisi gelombang batch 14.</p>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function ServicesPage() {
                   <CreditCard className="w-3.5 h-3.5" /> LAYANAN UTAMA AKTIF
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-950/60 border border-emerald-500/40 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                  ● OPERASIONAL PENUH / LIVE NOW
+                   OPERASIONAL PENUH / LIVE NOW
                 </span>
               </div>
 
@@ -300,7 +300,7 @@ export default function ServicesPage() {
 
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/60 border border-red-500/40 text-[10px] font-bold text-red-400 uppercase tracking-widest">
-              ● VIP EARLY ACCESS
+               VIP EARLY ACCESS
             </span>
 
             <h2 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
