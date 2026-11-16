@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, use } from 'react';
+import { useState, useEffect, useMemo, use, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
@@ -129,7 +129,10 @@ function formatTcgDisplay(raw: string | null): string {
     .join(' ');
 }
 
-export default function SetDetailPage({ params }: PageProps) {
+// =========================================================================
+// INTERNAL CLIENT COMPONENT (DIBUNGKUS SUSPENSE DI EXPORT DEFAULT)
+// =========================================================================
+function SetDetailContent({ params }: PageProps) {
   const resolvedParams = use(params);
   const rawParamId = resolvedParams.id;
   const targetSlug = normalizeSlug(rawParamId);
@@ -257,7 +260,6 @@ export default function SetDetailPage({ params }: PageProps) {
         entry.popMint95 += 1;
       }
 
-      // Simpan cert_number dengan grade tertinggi untuk tombol "Cek Pop Report"
       if (grade > entry.bestGrade) {
         entry.bestGrade = grade;
         entry.bestCertNumber = card.cert_number;
@@ -370,7 +372,6 @@ export default function SetDetailPage({ params }: PageProps) {
 
     const category = firstCard ? formatTcgDisplay(firstCard.tcg_type) : 'ICS Registry';
 
-    // Ambil tahun terawal dari created_at kartu di set ini
     const years = matchedCards
       .map((c) => (c.created_at ? new Date(c.created_at).getFullYear() : null))
       .filter((y): y is number => y !== null);
@@ -397,7 +398,6 @@ export default function SetDetailPage({ params }: PageProps) {
     };
   }, [matchedCards, matchMode, rawParamId, targetSlug, cardChecklist, setLeaders]);
 
-  // Filter Pencarian di Checklist
   const filteredChecklist = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return cardChecklist;
@@ -536,7 +536,6 @@ export default function SetDetailPage({ params }: PageProps) {
             </button>
           </div>
 
-          {/* Search Card inside Checklist */}
           {activeTab === 'checklist' && (
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -712,5 +711,27 @@ export default function SetDetailPage({ params }: PageProps) {
 
       </div>
     </div>
+  );
+}
+
+// =========================================================================
+// EXPORT DEFAULT DENGAN <Suspense> UNTUK NEXT.JS 16 BUILD / PRERENDER
+// =========================================================================
+export default function SetDetailPage({ params }: PageProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-surface text-foreground-hitam min-h-screen pt-28 pb-20">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="bg-card-putih border border-line-putih rounded-3xl p-20 flex flex-col items-center justify-center text-muted-hitam gap-3 shadow-xs">
+              <Loader2 className="w-8 h-8 animate-spin text-accent" />
+              <span className="text-xs font-medium">Memuat detail set registry...</span>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <SetDetailContent params={params} />
+    </Suspense>
   );
 }
