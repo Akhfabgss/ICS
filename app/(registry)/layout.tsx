@@ -17,6 +17,8 @@ export default function RegistryLayout({
       <main className="flex-1">{children}</main>
 
       <FooterRegistry />
+
+      <FloatingThemeToggle />
     </div>
   );
 }

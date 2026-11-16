@@ -75,7 +75,7 @@ export default function NavbarRegistry() {
           <div className="flex items-center gap-3 shrink-0">
             <Link href="/" className="flex items-center group" title="Kembali ke Beranda ICS Utama">
               <img
-                src="/images/logo/ics-logo2.png"
+                src="/images/logo/ics-Logo2.png"
                 alt="Logo-ICS"
                 className="hidden not-dark:block w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-105 transition-transform"
               />
