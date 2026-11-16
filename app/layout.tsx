@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -23,11 +21,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
-      <body className="bg-[#0A0C10] text-white antialiased min-h-screen flex flex-col justify-between">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+    <html lang="id" suppressHydrationWarning>
+      <head>
+        {/* Default: Mode Terang (Light). Jika user pernah memilih 'dark', aktifkan sebelum render */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                try {
+                  var savedTheme = localStorage.getItem('ics-theme');
+                  if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="bg-surface text-foreground-hitam antialiased min-h-screen flex flex-col justify-between transition-colors duration-300">
+        {children}
       </body>
     </html>
   );

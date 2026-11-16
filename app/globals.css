@@ -1,5 +1,104 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* ==========================================================================
+   1. DEFINISI NILAI WARNA MODE TERANG (DEFAULT: PUTIH, HITAM ELEGAN, MERAH)
+   ========================================================================== */
+:root {
+  /* Surface Halaman Utama */
+  --surface: #ffffff;
+
+  /* Card Variasi Terang (Untuk card standar di atas background putih) */
+  --card-putih: #f8fafc;
+  --elevated-putih: #f1f5f9;
+  --foreground-hitam: #0a0c10;
+  --muted-hitam: #4b5563;
+  --subtle-hitam: #64748b;
+  --line-putih: #e2e8f0;
+  --line-putih-soft: #f1f5f9;
+
+  /* Card Variasi Hitam (Menggunakan #12151C / #15181F agar berdimensi, tidak flat #0A0C10) */
+  --card-hitam: rgba(18, 21, 28, 0.85);
+  --elevated-hitam: #1a1e28;
+  --foreground-putih: #ffffff;
+  --muted-putih: #9ca3af;
+  --subtle-putih: #6b7280;
+  --line-hitam: rgba(255, 255, 255, 0.12);
+  --line-hitam-soft: rgba(255, 255, 255, 0.06);
+
+  /* Warna Aksen Merah ICS */
+  --accent: #dc2626;
+  --accent-hover: #ef4444;
+  --accent-soft: #fef2f2;
+  --accent-border: #fecaca;
+}
+
+/* ==========================================================================
+   2. DEFINISI NILAI WARNA MODE GELAP (.dark)
+   ========================================================================== */
+.dark {
+  /* Surface Halaman Utama */
+  --surface: #0a0c10;
+
+  /* Card Variasi Terang otomatis berubah gelap di Dark Mode */
+  --card-putih: rgba(18, 21, 28, 0.8);
+  --elevated-putih: #15181f;
+  --foreground-hitam: #ffffff;
+  --muted-hitam: #9ca3af;
+  --subtle-hitam: #6b7280;
+  --line-putih: rgba(255, 255, 255, 0.1);
+  --line-putih-soft: rgba(255, 255, 255, 0.05);
+
+  /* Card Variasi Hitam tetap tampil berdimensi di atas #0A0C10 */
+  --card-hitam: rgba(18, 21, 28, 0.85);
+  --elevated-hitam: #15181f;
+  --foreground-putih: #ffffff;
+  --muted-putih: #9ca3af;
+  --subtle-putih: #6b7280;
+  --line-hitam: rgba(255, 255, 255, 0.1);
+  --line-hitam-soft: rgba(255, 255, 255, 0.05);
+
+  /* Warna Aksen Merah ICS */
+  --accent: #ef4444;
+  --accent-hover: #f87171;
+  --accent-soft: rgba(69, 10, 10, 0.45);
+  --accent-border: rgba(239, 68, 68, 0.35);
+}
+
+/* ==========================================================================
+   3. REGISTRASI SEMANTIC TOKENS KE TAILWIND V4
+   ========================================================================== */
+@theme inline {
+  --color-surface: var(--surface);
+
+  /* Token Card Putih */
+  --color-card-putih: var(--card-putih);
+  --color-elevated-putih: var(--elevated-putih);
+  --color-foreground-hitam: var(--foreground-hitam);
+  --color-muted-hitam: var(--muted-hitam);
+  --color-subtle-hitam: var(--subtle-hitam);
+  --color-line-putih: var(--line-putih);
+  --color-line-putih-soft: var(--line-putih-soft);
+
+  /* Token Card Hitam */
+  --color-card-hitam: var(--card-hitam);
+  --color-elevated-hitam: var(--elevated-hitam);
+  --color-foreground-putih: var(--foreground-putih);
+  --color-muted-putih: var(--muted-putih);
+  --color-subtle-putih: var(--subtle-putih);
+  --color-line-hitam: var(--line-hitam);
+  --color-line-hitam-soft: var(--line-hitam-soft);
+
+  /* Aksen Merah */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-border: var(--accent-border);
+}
+
+/* ==========================================================================
+   4. KEYFRAMES ANIMASI
+   ========================================================================== */
 @keyframes floatSlow {
   0%, 100% {
     transform: translateY(0px) rotate(-14deg);

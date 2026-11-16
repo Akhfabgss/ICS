@@ -1,0 +1,499 @@
+  main/page
+  const steps = [
+    {
+      num: '1',
+      title: 'Submit & Record',
+      desc: 'Kirim atau serahkan kartu dan barang koleksi favoritmu secara online atau melalui Drop Point resmi ICS di berbagai kota Indonesia.',
+      icon: Truck,
+    },
+    {
+      num: '2',
+      title: 'Microscopic Inspection',
+      desc: 'Pemeriksaan fisik 4 parameter (Centering, Corners, Edges, Surface) menggunakan mikroskop optik presisi tinggi.',
+      icon: Search,
+    },
+    {
+      num: '3',
+      title: 'Sonic Encapsulation',
+      desc: 'Enkapsulasi kartu ke dalam slab akrilik custom berteknologi Sonic-Welded yang kedap udara, dilindungi label hologram & NFC.',
+      icon: ShieldCheck,
+    },
+    {
+      num: '4',
+      title: 'Digital Passport Live',
+      desc: 'Sertifikat digital terbit permanen di database ICS. Bebas verifikasi via QR Code & Tap NFC kapan saja.',
+      icon: QrCode,
+    },
+  ];
+
+// ubah ke database atau ke penggunaan database
+  {/* 3 CATEGORY CARDS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          {/* CARD 1: TCG & TRADING CARDS (ACTIVE - CARD HITAM FEATURED) */}
+          <div className="bg-card-hitam border-2 border-red-500/70 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl group hover:border-red-500 transition-all duration-300 backdrop-blur-md">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3 bg-red-600/15 border border-red-500/30 rounded-xl text-red-500">
+                  <CreditCard className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold tracking-widest uppercase bg-red-600 text-white px-2.5 py-1 rounded-full shadow-md">
+                  ACTIVE / PRIORITY
+                </span>
+              </div>
+
+              <h3 className="text-xl font-extrabold text-foreground-putih mb-2">TCG & Trading Cards</h3>
+              <p className="text-xs text-muted-putih leading-relaxed mb-6">
+                Pokémon TCG, One Piece Card Game, Yu-Gi-Oh!, Magic: The Gathering, Union Arena, and Sports Cards.
+              </p>
+
+              <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-4 space-y-2 mb-8">
+                <p className="text-xs font-bold text-foreground-putih">Fitur Tersedia Lengkap:</p>
+                <ul className="text-xs text-muted-putih space-y-1.5">
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-red-500">•</span> Full Micro-Optics Grading & Sub-grades
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-red-500">•</span> Sonic-Welded Acrylic Slabs & Dual NFC
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="text-red-500">•</span> Integrasi Set Registry & Leaderboard Nasional
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <Link
+              href="/pricing"
+              className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-600/30 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Kirim Kartu Sekarang <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* CARD 2: ACTION FIGURE & VINYL (COMING SOON - CARD PUTIH) */}
+          <div className="bg-card-putih border border-line-putih rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative group hover:border-red-500/30 transition-all duration-300 shadow-xs">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3 bg-elevated-putih border border-line-putih rounded-xl text-muted-hitam">
+                  <Package className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold tracking-widest uppercase bg-elevated-putih text-muted-hitam px-2.5 py-1 rounded-full border border-line-putih">
+                  COMING SOON — Q3 2026
+                </span>
+              </div>
+
+              <h3 className="text-xl font-extrabold text-foreground-hitam mb-2">Action Figure & Vinyl</h3>
+              <p className="text-xs text-muted-hitam leading-relaxed mb-6">
+                Hot Toys, Bearbrick 1000%/400%, Funko Pop! Grails, Designer Toys, Sofubi, dan Figurine Eksklusif.
+              </p>
+
+              <div className="bg-elevated-putih border border-line-putih-soft rounded-xl p-4 space-y-2 mb-8">
+                <p className="text-xs font-bold text-muted-hitam">Spesifikasi Layanan:</p>
+                <ul className="text-xs text-subtle-hitam space-y-1.5">
+                  <li className="flex items-center gap-1.5">
+                    <span>•</span> Verifikasi Box, Seal Keaslian & Cetakan Cat
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span>•</span> Case Akrilik Custom UV-Proof dengan Lock Hologram
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span>•</span> Sertifikasi Serial Number Produsen Resmi
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <button className="w-full bg-elevated-putih hover:opacity-80 border border-line-putih text-foreground-hitam font-medium text-xs sm:text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
+              <Bell className="w-4 h-4 text-accent" /> Ingatkan Saat Rilis
+            </button>
+          </div>
+
+          {/* CARD 3: DIECAST & MEMORABILIA (PLANNED - CARD PUTIH) */}
+          <div className="bg-card-putih border border-line-putih-soft rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative group hover:border-line-putih transition-all duration-300 shadow-xs">
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3 bg-elevated-putih border border-line-putih rounded-xl text-subtle-hitam">
+                  <Car className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-bold tracking-widest uppercase bg-elevated-putih text-subtle-hitam px-2.5 py-1 rounded-full border border-line-putih-soft">
+                  PLANNED EXPANSION
+                </span>
+              </div>
+
+              <h3 className="text-xl font-extrabold text-foreground-hitam mb-2">Diecast & Memorabilia</h3>
+              <p className="text-xs text-subtle-hitam leading-relaxed mb-6">
+                Hot Wheels RLC & Super Treasure Hunt, Tomica Limited Vintage, LEGO Sealed Sets, & Tanda Tangan Terverifikasi.
+              </p>
+
+              <div className="bg-elevated-putih border border-line-putih-soft rounded-xl p-4 space-y-2 mb-8">
+                <p className="text-xs font-bold text-subtle-hitam">Spesifikasi Layanan:</p>
+                <ul className="text-xs text-subtle-hitam space-y-1.5">
+                  <li className="flex items-center gap-1.5">
+                    <span>•</span> Blister & Cardboard Integrity Grading
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span>•</span> Otentikasi Tanda Tangan & COA Matching
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span>•</span> Archival Encasement Khusus Skala 1:64
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+
+main/pricing
+const categories = [
+    { id: 'tcg', label: 'Card / TCG', icon: CreditCard, active: true },
+    { id: 'figure', label: 'Action Figure', icon: Package, active: false },
+    { id: 'coins', label: 'Coins & Banknotes', icon: Coins, active: false },
+    { id: 'photocard', label: 'Photocard', icon: Sparkles, active: false },
+    { id: 'comics', label: 'Comic & Games', icon: BookOpen, active: false },
+  ];
+
+  const faqs = [
+    {
+      q: "Apa perbedaan mendasar Founder's Batch vs Standard?",
+      a: "Founder's Batch adalah paket perkenalan berkuota terbatas (20–30 kartu awal) dengan harga promo Rp150.000 untuk membangun portofolio awal. Layanan Standard (Rp199.000) adalah tarif operasional reguler dengan jaminan pengerjaan yang stabil.",
+    },
+    {
+      q: 'Berapa lama estimasi pengerjaan untuk masing-masing tier?',
+      a: 'SLA Standard membutuhkan waktu 14–21 hari kerja. Untuk tier Priority (Rp249.000), estimasi pengerjaan dipercepat menjadi 3–7 hari kerja.',
+    },
+    {
+      q: 'Kapan kategori Action Figure dan lainnya dibuka?',
+      a: 'Kategori Action Figure dijadwalkan masuk tahap beta pada Q3 2026. Anda dapat mendaftarkan email di halaman Services untuk notifikasi awal.',
+    },
+    {
+      q: 'Apakah ada jaminan kartu saya mendapatkan grade 10?',
+      a: 'Tidak. ICS melakukan penilaan secara independen dan objektif berdasarkan kriteria fisik asli tanpa dipengaruhi oleh permintaan pelanggan atau harga pasar kartu.',
+    },
+  ];
+
+
+// ubah ke database local
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+
+          {/* TIER 1: FOUNDER'S BATCH (CARD PUTIH) */}
+          <div className="bg-card-putih border border-line-putih rounded-2xl p-6 sm:p-8 flex flex-col justify-between hover:border-red-500/30 transition-all duration-200 shadow-xs">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2.5 py-1 rounded-md">
+                  KUOTA TERBATAS
+                </span>
+                <span className="text-xs text-subtle-hitam font-mono">BATCH 01</span>
+              </div>
+
+              <h3 className="text-xl font-extrabold text-foreground-hitam">ICS Founder's Batch</h3>
+              <p className="text-xs text-muted-hitam mt-2 leading-relaxed min-h-[36px]">
+                Cocok untuk 20–30 kartu pertama. Membantu menguji proses operasional dan membangun portofolio awal.
+              </p>
+
+              <div className="my-6 pt-4 border-t border-line-putih-soft">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-foreground-hitam">Rp 150.000</span>
+                  <span className="text-xs text-subtle-hitam font-medium">/ kartu</span>
+                </div>
+                <p className="text-[11px] text-amber-600 dark:text-amber-400/80 mt-1">SLA Pengerjaan Perkenalan</p>
+              </div>
+
+              <ul className="space-y-3 text-xs text-muted-hitam mb-8">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Grading & Inspeksi 4 Parameter (Centering, Corners, Edges, Surface)</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Slab Akrilik Pelindung + Label Unik ICS</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Nomor Sertifikat & QR Code Verification</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Pencatatan Permanen di Database Digital ICS</span>
+                </li>
+              </ul>
+            </div>
+
+            <Link
+              href="/order/founders"
+              className="w-full bg-elevated-putih hover:opacity-80 border border-line-putih text-foreground-hitam font-bold text-xs sm:text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all"
+            >
+              Pesan Tier Founder's <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* TIER 2: STANDARD (FEATURED - CARD HITAM KONTRAS) */}
+          <div className="bg-card-hitam border-2 border-red-500/75 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl hover:border-red-500 transition-all duration-200 backdrop-blur-md">
+
+            {/* Featured Badge */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-0.5 rounded-full shadow-md text-center">
+              RECOMMENDED / UTAMA
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-500/15 border border-red-500/30 px-2.5 py-1 rounded-md">
+                  LAYANAN STANDAR
+                </span>
+                <span className="text-xs text-muted-putih font-mono">14–21 HARI</span>
+              </div>
+
+              <h3 className="text-xl font-extrabold text-foreground-putih">ICS Standard</h3>
+              <p className="text-xs text-muted-putih mt-2 leading-relaxed min-h-[36px]">
+                Layanan grading standar yang disarankan dengan proses operasional yang stabil, presisi, dan konsisten.
+              </p>
+
+              <div className="my-6 pt-4 border-t border-line-hitam-soft">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-foreground-putih">Rp 199.000</span>
+                  <span className="text-xs text-subtle-putih font-medium">/ kartu</span>
+                </div>
+                <p className="text-[11px] text-muted-putih mt-1">Standard Turnaround (14–21 Hari Kerja)</p>
+              </div>
+
+              <ul className="space-y-3 text-xs text-muted-putih mb-8">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <span>Semua fitur yang ada di Founder's Batch</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <span>Stiker Segel Hologram Keamanan (Anti-Tamper)</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <span>Tag Dual NFC & QR Code Verification</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <span>Foto Dokumentasi HD Forensik di Database ICS</span>
+                </li>
+              </ul>
+            </div>
+
+            <Link
+              href="/order/standard"
+              className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            >
+              Pesan Paket Standard <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* TIER 3: PRIORITY (CARD PUTIH) */}
+          <div className="bg-card-putih border border-line-putih rounded-2xl p-6 sm:p-8 flex flex-col justify-between hover:border-red-500/30 transition-all duration-200 shadow-xs">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/25 px-2.5 py-1 rounded-md">
+                  EXPRESS SLA
+                </span>
+                <span className="text-xs text-muted-hitam font-mono">3–7 HARI</span>
+              </div>
+
+              <h3 className="text-xl font-extrabold text-foreground-hitam">ICS Priority</h3>
+              <p className="text-xs text-muted-hitam mt-2 leading-relaxed min-h-[36px]">
+                Layanan prioritas bagi kamu yang membutuhkan proses pengerjaan dan penyelesaian lebih cepat.
+              </p>
+
+              <div className="my-6 pt-4 border-t border-line-putih-soft">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-foreground-hitam">Rp 249.000</span>
+                  <span className="text-xs text-subtle-hitam font-medium">/ kartu</span>
+                </div>
+                <p className="text-[11px] text-blue-600 dark:text-blue-400/80 mt-1">Priority Turnaround (3–7 Hari Kerja)</p>
+              </div>
+
+              <ul className="space-y-3 text-xs text-muted-hitam mb-8">
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Semua fitur lengkap di paket Standard</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Antrean Pengerjaan Prioritas (SLA Tercepat)</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Penanganan Khusus Aset Koleksi Bernilai Tinggi</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <span>Notifikasi Pembaruan Status Real-Time via WA/Email</span>
+                </li>
+              </ul>
+            </div>
+
+            <Link
+              href="/order/priority"
+              className="w-full bg-elevated-putih hover:opacity-80 border border-line-putih text-foreground-hitam font-bold text-xs sm:text-sm py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all"
+            >
+              Pesan Paket Priority <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+        </div>
+
+main/grading-standar
+ const [filter, setFilter] = useState<'all' | 'high' | 'mid' | 'low'>('all');
+
+  const gradeList = [
+    {
+      score: '10',
+      badge: 'PERFECT',
+      badgeBg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
+      title: 'Gem Mint / Perfect',
+      subtitle: 'Pristine Condition',
+      desc: 'Kartu dalam kondisi sempurna tanpa cacat fisik apa pun. Centering sangat presisi (50/50 hingga 55/45), 4 sudut tajam sempurna di bawah 30x optik zoom, tepi bersih bebas whiteline/chipping, dan permukaan mengkilap tanpa noda pabrik.',
+      tag: 'Grade Sempurna Kolektor • Investasi Tertinggi',
+      psa: 'PSA 10',
+      bgs: 'BGS 9.5 - 10',
+      cgc: 'CGC 10',
+      categoryGroup: 'high',
+    },
+    {
+      score: '9.5',
+      badge: 'MINT+',
+      badgeBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+      title: 'Mint+',
+      subtitle: 'Near Perfect',
+      desc: 'Kondisi kartu hampir tanpa cela. Hanya memiliki 1 cacat mikroskopis terisolasi (misal centering sedikit bergeser 60/40 atau garis halus cetakan pabrik/print-line yang sangat samar hanya terlihat di bawah sinar UV).',
+      tag: 'Top Registry Grade Tier',
+      psa: 'PSA 9.5',
+      bgs: 'BGS 9.5',
+      cgc: 'CGC 9.5',
+      categoryGroup: 'high',
+    },
+    {
+      score: '9.0',
+      badge: 'MINT',
+      badgeBg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+      title: 'Mint',
+      subtitle: 'Superb High-Grade',
+      desc: 'Kartu dalam kondisi sangat prima. Memiliki 1 cacat minor yang sangat tipis (seperti spek putih mikro di salah satu sudut), namun secara kasat mata tetap terlihat sempurna dan mempertahankan kilau foil asli.',
+      tag: 'High Premium Investment Grade',
+      psa: 'PSA 9',
+      bgs: 'BGS 9.0',
+      cgc: 'CGC 9.0',
+      categoryGroup: 'high',
+    },
+    {
+      score: '8.0 - 8.5',
+      badge: 'NM-MT',
+      badgeBg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30',
+      title: 'Near Mint / Mint (NM-MT)',
+      subtitle: 'Excellent High-Grade',
+      desc: 'Kartu tampak sangat bersih. Di bawah pemeriksaan mikroskopik, terlihat 1-2 cacat ringan seperti whiteline tipis di tepi (edges) atau flek halus pada permukaan lapisan foil pelindung.',
+      tag: 'Koleksi Terawat Prima',
+      psa: 'PSA 8 - 8.5',
+      bgs: 'BGS 8 - 8.5',
+      cgc: 'CGC 8 - 8.5',
+      categoryGroup: 'high',
+    },
+    {
+      score: '7.0',
+      badge: 'NM',
+      badgeBg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
+      title: 'Near Mint (NM)',
+      subtitle: 'High-Grade Condition',
+      desc: 'Kartu menunjukkan tanda penanganan fisik sangat minim. Terlihat whiteline ringan di sudut/tepi atau bekas gesekan halus, tanpa ada lipatan (crease) atau kerusakan struktur inti kertas.',
+      tag: 'Standar Pasar Binder Klasik',
+      psa: 'PSA 7',
+      bgs: 'BGS 7.0',
+      cgc: 'CGC 7.0',
+      categoryGroup: 'mid',
+    },
+    {
+      score: '5.0 - 6.5',
+      badge: 'EX / EX-MT',
+      badgeBg: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30',
+      title: 'Excellent (EX) / Excellent-Mint (EX-MT)',
+      subtitle: 'Mid-Grade / Lightly Played',
+      desc: 'Terdapat bekas pemakaian fisik yang jelas terlihat, seperti sudut yang mulai tumpul, pengelupasan warna tipis di tepi, atau goresan halus di permukaan tanpa mengurangi nilai historis kartu.',
+      tag: 'Kondisi Kartu Koleksi Vintage',
+      psa: 'PSA 5 - 6',
+      bgs: 'BGS 5.0 - 6.5',
+      cgc: 'CGC 5.0 - 6.5',
+      categoryGroup: 'mid',
+    },
+    {
+      score: '3.0 - 4.5',
+      badge: 'VG / GOOD',
+      badgeBg: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/30',
+      title: 'Very Good (VG) / Good (G)',
+      subtitle: 'Played Condition',
+      desc: 'Kartu menunjukkan bekas penanganan nyata. Terdapat tumpul sudut, fading warna, atau cetakan lipatan halus (minor crease) yang tidak merusak keutuhan struktur lembaran kartu.',
+      tag: 'Otentisitas & Preservasi Slab',
+      psa: 'PSA 3 - 4',
+      bgs: 'BGS 3.0 - 4.5',
+      cgc: 'CGC 3.0 - 4.5',
+      categoryGroup: 'low',
+    },
+    {
+      score: '1.0 - 2.5',
+      badge: 'POOR / FAIR',
+      badgeBg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30',
+      title: 'Poor / Fair',
+      subtitle: 'Heavily Damaged',
+      desc: 'Kartu mengalami kerusakan fisik signifikan seperti lipatan parah (heavy crease), noda, atau pengelupasan kertas. Keaslian kartu tetap terverifikasi secara forensik dan terlindungi permanen dalam cangkang akrilik.',
+      tag: 'Autentikasi Terjamin & Terkunci',
+      psa: 'PSA 1 - 2',
+      bgs: 'BGS 1.0 - 2.5',
+      cgc: 'CGC 1.0 - 2.5',
+      categoryGroup: 'low',
+    },
+  ];
+
+main/Services
+const upcomingCategories = [
+    {
+      title: 'Action Figure Authentication',
+      status: 'IN DEVELOPMENT',
+      statusColor: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
+      icon: PackageCheck,
+      desc: 'Pemeriksaan moulding orisinal pabrikan, ketegangan persendian joints, kelengkapan blister, dan sertifikasi stamping.',
+      target: 'Target: Q3 2026',
+    },
+    {
+      title: 'Photocard Grading (K-Pop & Idol)',
+      status: 'COMING SOON',
+      statusColor: 'bg-elevated-putih text-muted-hitam border-line-putih',
+      icon: Sparkles,
+      desc: 'Penilaian kartu idola resmi agensi vs fanmade, analisis album press mark, dan proteksi micro-slab ultrasonik compact.',
+      target: 'Target: Q3 2026',
+    },
+    {
+      title: 'Comic & Manga Grading',
+      status: 'COMING SOON',
+      statusColor: 'bg-elevated-putih text-muted-hitam border-line-putih',
+      icon: BookOpen,
+      desc: 'Kelenturan kertas, retensi gloss cover, deteksi spine roll, karat staples vintage, dan enkapsulasi archival acid-free.',
+      target: 'Target: Q4 2026',
+    },
+    {
+      title: 'Retro Video Games',
+      status: 'COMING SOON',
+      statusColor: 'bg-elevated-putih text-muted-hitam border-line-putih',
+      icon: Gamepad2,
+      desc: 'Kondisi cartridge/disc optik, keaslian segel pabrik (H-seam seal & vent holes), serta casing display akrilik presisi.',
+      target: 'Target: Q4 2026',
+    },
+    {
+      title: 'LEGO Minifigures & Sets',
+      status: 'COMING SOON',
+      statusColor: 'bg-elevated-putih text-muted-hitam border-line-putih',
+      icon: Boxes,
+      desc: 'Keaslian part ber-logo resmi, keutuhan print torso mikro, kelenturan joints, dan verifikasi segel tape kardus.',
+      target: 'Target: Q4 2026',
+    },
+    {
+      title: 'Coins & Banknotes (Numismatik)',
+      status: 'COMING SOON',
+      statusColor: 'bg-elevated-putih text-muted-hitam border-line-putih',
+      icon: Coins,
+      desc: 'Identifikasi varian cetak koin kuno & uang kertas, uji kilau lustre kertas, serta spektrometri non-destruktif paduan logam.',
+      target: 'Target: 2027',
+    },
+  ];
