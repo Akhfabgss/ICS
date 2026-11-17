@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import CollectorAvatar from '@/components/CollectorAvatar';
 import {
   Trophy,
   Search,
@@ -22,12 +23,17 @@ import {
 // =========================================================================
 interface CollectorRow {
   id: string;
+  user_id: string | null;
   username: string;
   display_name: string;
+  whatsapp_no?: string | null;
+  location: string | null;
+  bio: string | null;
+  avatar_bg: string;
   manual_points: number;
   sets_completed: number;
   badge: string;
-  avatar_bg: string;
+  join_date: string;
 }
 
 interface CardRegistryRow {
@@ -52,11 +58,13 @@ interface CollectorLeaderboardItem {
   id: string;
   rank: number;
   username: string;
+  rawUsername: string;
   displayName: string;
   totalPoints: number;
   completedSets: number;
   gemMintCount: number;
   badgeColor: string;
+  avatarBg: string;
 }
 
 interface AggregatedSetItem {
@@ -254,13 +262,16 @@ export default function SetRegistryHomePage() {
         const cStats = cardStatsByCollector.get(c.id) || { cardPoints: 0, gemMintCount: 0 };
         const totalPoints = Number(c.manual_points || 0) + cStats.cardPoints;
 
+        const rawUsername = c.username.replace(/^@/, '');
         return {
           id: c.id,
           username: c.username.startsWith('@') ? c.username : `@${c.username}`,
+          rawUsername,
           displayName: c.display_name,
           totalPoints,
           completedSets: Number(c.sets_completed || 0),
           gemMintCount: cStats.gemMintCount,
+          avatarBg: c.avatar_bg || 'from-indigo-500 to-purple-600', // Tangkap avatar_bg database
         };
       })
       .sort((a, b) => b.totalPoints - a.totalPoints)
@@ -435,26 +446,6 @@ export default function SetRegistryHomePage() {
                 {activeSlideData.description}
               </p>
 
-              {/* Search Bar + CTA Button */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 max-w-xl">
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Cari nama set, kode rilis, atau kolektor..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#0A0C10]/90 backdrop-blur-md border border-white/15 rounded-xl pl-10 pr-4 py-3 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-red-500/70 transition-colors"
-                  />
-                </div>
-
-                <Link
-                  href={activeSlideData.ctaLink}
-                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 whitespace-nowrap transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {activeSlideData.ctaText} <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
             </div>
 
           </div>
@@ -583,7 +574,14 @@ export default function SetRegistryHomePage() {
                       </td>
                       <td className="py-4 px-4 font-sans font-bold text-foreground-hitam">
                         <div className="flex items-center gap-2">
-                          <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <CollectorAvatar
+                            avatarBg={row.avatarBg}
+                            username={row.rawUsername}
+                            sizeClass="w-9 h-9"
+                            textSizeClass="text-sm"
+                            shapeClass="rounded-full"
+                            borderClass="shadow-xs"
+                          />
                           <div>
                             <span className="block">{row.username}</span>
                             {row.displayName && (

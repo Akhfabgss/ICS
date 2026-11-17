@@ -23,19 +23,33 @@ export default function ContactPage() {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: 'general',
-        message: '',
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-    }, 4000);
+
+      if (!response.ok) throw new Error('Gagal mengirim pesan');
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: 'general',
+          message: '',
+        });
+      }, 4000);
+    } catch (err) {
+      alert('Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.');
+      console.error(err);
+    }
   };
 
   return (

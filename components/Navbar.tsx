@@ -51,7 +51,7 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'Service', href: '/services' },
     { name: 'Pricing', href: '/pricing' },
-    { name: 'Set Registry', href: '/set-registry' },
+    { name: 'Set Registry', href: '/set-registry', target:"_blank" },
     { name: 'Grading Standar', href: '/grading-standar' },
     { name: 'Check ICS', href: '/check-ics' },
     { name: 'Contact', href: '/contact' },

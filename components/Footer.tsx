@@ -50,7 +50,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/under-construction" className="hover:text-red-500 transition-colors duration-200">
+                <Link href="/set-registry" target="_blank" className="hover:text-red-500 transition-colors duration-200">
                   Set Registry
                 </Link>
               </li>
@@ -60,7 +60,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/grading-standards" className="hover:text-red-500 transition-colors duration-200">
+                <Link href="/grading-standar" className="hover:text-red-500 transition-colors duration-200">
                   Grading Standards
                 </Link>
               </li>
@@ -82,7 +82,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/verify-tech" className="hover:text-red-500 transition-colors duration-200">
+                <Link href="/check-ics" className="hover:text-red-500 transition-colors duration-200">
                   Verifikasi Barcode & RFID
                 </Link>
               </li>
@@ -94,12 +94,12 @@ export default function Footer() {
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">TENTANG</h4>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
-                <Link href="/about" className="hover:text-red-500 transition-colors duration-200">
+                <Link href="/under-construction" className="hover:text-red-500 transition-colors duration-200">
                   Tentang Kami
                 </Link>
               </li>
               <li>
-                <Link href="/careers" className="hover:text-red-500 transition-colors duration-200">
+                <Link href="/under-construction" className="hover:text-red-500 transition-colors duration-200">
                   Karir & Internship
                 </Link>
               </li>
@@ -115,7 +115,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 py-4 items-start">
 
           {/* STAY UPDATED / NEWSLETTER */}
-          <div className="lg:col-span-6 space-y-3">
+          <div className="lg:col-span-5 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">STAY UPDATED</h4>
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm">
               Dapatkan akses awal drop grade, alert populasi, dan analisis pasar kartu koleksi Indonesia.
@@ -141,19 +141,24 @@ export default function Footer() {
 
           {/* KONTAK TELEPON & EMAIL */}
           <div className="lg:col-span-3 lg:border-l border-white/10 lg:pl-8 space-y-2 py-2">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">CONTACT</h4>
             <p className="text-xs sm:text-sm text-gray-300 hover:text-red-500 transition-colors">
-              +62 21-1234-5678
+              +62 813-8599-7264
             </p>
             <p className="text-xs sm:text-sm text-gray-300 hover:text-red-500 transition-colors">
-              testing@gmail.com
+              ics.official.registry@gmail.com
             </p>
           </div>
 
           {/* ALAMAT & SOSIAL MEDIA */}
-          <div className="lg:col-span-3 space-y-3">
+          <div className="lg:col-span-4 space-y-3 py-2">
             <div>
-              <h4 className="text-xs font-bold text-white tracking-wider">Address</h4>
-              <p className="text-gray-400 text-xs sm:text-sm">Based in Indonesia</p>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">ADDRESS</h4>
+              <p className="text-gray-400 text-xs sm:text-sm font-bold">ICS Grading Pusat</p>
+              <p className="text-gray-400 text-xs sm:text-sm">Jl. Ps. Hewan No.75, RT.01/RW.06, Tanah Sareal, Kota Bogor, Jawa Barat 16162</p>
+              <br />
+              <p className="text-gray-400 text-xs sm:text-sm font-bold">ICS Grading Branch Jakarta</p>
+              <p className="text-gray-400 text-xs sm:text-sm">Jl. Kudus No.8, RT.7/RW.6, Dukuh Atas, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10310</p>
             </div>
 
             {/* SOCIAL MEDIA ICONS */}

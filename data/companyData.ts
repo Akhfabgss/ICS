@@ -479,3 +479,227 @@ export const UPCOMING_CATEGORIES: UpcomingCategoryItem[] = [
     target: 'Target: 2027',
   },
 ];
+
+
+export interface LegalHighlightItem {
+  iconName: 'shield-check' | 'file-check' | 'sparkles' | 'eye-off' | 'server' | 'user-cog';
+  iconColorClass: string;
+  label: string;
+}
+
+export interface LegalSectionItem {
+  id: string;
+  number: string;
+  title: string;
+  content: string[];
+}
+
+export interface LegalDocumentData {
+  lastUpdated: string;
+  badgeText: string;
+  titlePrefix: string;
+  titleAccent: string;
+  description: string;
+  tocHeading: string;
+  highlights: LegalHighlightItem[];
+  sections: LegalSectionItem[];
+  ctaBox: {
+    variant: 'warning' | 'accent';
+    title: string;
+    descriptionPrefix: string;
+    relatedLinkLabel: string;
+    relatedLinkHref: string;
+    descriptionSuffix: string;
+    buttonLabel: string;
+    buttonHref: string;
+  };
+}
+
+export const ICS_LEGAL_DATA: {
+  terms: LegalDocumentData;
+  privacy: LegalDocumentData;
+} = {
+  terms: {
+    lastUpdated: 'PEMBARUAN TERAKHIR: NOVEMBER 2026',
+    badgeText: 'LEGAL & COMPLIANCE FRAMEWORK',
+    titlePrefix: 'Syarat & Ketentuan Layanan ',
+    titleAccent: 'ICS',
+    description:
+      'Dokumen ini mengatur hak, kewajiban, serta standar operasional antara Indonesia Collectibles Standar (ICS) dan pengguna dalam setiap transaksi pengujian keaslian, penilaian kondisi, enkapsulasi slab, maupun penggunaan portal Set Registry.',
+    tocHeading: 'DAFTAR PASAL KETENTUAN',
+    highlights: [
+      {
+        iconName: 'shield-check',
+        iconColorClass: 'text-emerald-400',
+        label: 'Autentikasi Independen',
+      },
+      {
+        iconName: 'file-check',
+        iconColorClass: 'text-amber-400',
+        label: 'Segel Ultrasonik & NFC',
+      },
+      {
+        iconName: 'sparkles',
+        iconColorClass: 'text-red-400',
+        label: 'Transparansi Pop Report',
+      },
+    ],
+    sections: [
+      {
+        id: 'ketentuan-umum',
+        number: '01',
+        title: 'Ketentuan Umum & Ruang Lingkup Layanan',
+        content: [
+          'Dengan mengakses situs web, mendaftarkan akun di ICS Set Registry, atau mengirimkan aset koleksi untuk dinilai (grading), Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat & Ketentuan yang berlaku di Indonesia Collectibles Standar (ICS).',
+          'Layanan ICS mencakup verifikasi keaslian forensik, penilaian kondisi fisik berdasarkan skala standar 1–10 (Centering, Corners, Edges, Surface), enkapsulasi ultrasonik dengan segel anti-rusak, serta pencatatan sertifikat digital terenkripsi (Dual-NFC & Ledger).',
+        ],
+      },
+      {
+        id: 'pengajuan-pengiriman',
+        number: '02',
+        title: 'Pengajuan, Pengiriman & Asuransi Aset Koleksi',
+        content: [
+          'Pengaju wajib memastikan bahwa setiap kartu koleksi (TCG/Sports), figure, atau item yang dikirimkan adalah milik sah pengaju dan bukan barang hasil tindak pidana atau sengketa kepemilikan.',
+          'Setiap pengiriman fisik menuju dan dari laboratorium ICS wajib menggunakan pelindung standar (penny sleeve & semi-rigid card saver / toploader) serta dikemas secara aman. Risiko kerusakan selama perjalanan menuju fasilitas ICS sebelum paket diterima dan dipindai oleh tim logistik kami sepenuhnya berada pada pihak ekspedisi atau pengirim.',
+          'Nilai pertanggungan asuransi selama proses pengerjaan di laboratorium mengacu pada deklarasi nilai (Declared Value) dan tier paket layanan yang dipilih saat pembuatan pesanan.',
+        ],
+      },
+      {
+        id: 'standar-penilaian',
+        number: '03',
+        title: 'Objektivitas Penilaian (Grading) & Kebijakan Autentikasi',
+        content: [
+          'Hasil penilaian (grade) ditentukan secara independen oleh tim grader bersertifikat ICS menggunakan instrumen mikroskop optik dan pencahayaan spektrum penuh sesuai pedoman ICS Grading Standards.',
+          'Keputusan nilai akhir bersifat mutlak dan profesional. Biaya layanan grading merupakan imbalan atas jasa pemeriksaan teknis dan tidak dapat dikembalikan (non-refundable) meskipun aset memperoleh nilai di bawah ekspektasi pengaju atau dinyatakan tidak autentik (Authentic Altered / Counterfeit).',
+          'Untuk item yang terdeteksi mengalami modifikasi tidak sah (trimming, recoloring, atau pemalsuan), ICS berhak menolak enkapsulasi dan mengembalikan item dalam kondisi tersegel beserta catatan temuan teknis.',
+        ],
+      },
+      {
+        id: 'garansi-slab-nfc',
+        number: '04',
+        title: 'Integritas Slab, Chip Dual-NFC & Pembekuan Sertifikat',
+        content: [
+          'Setiap slab ICS dilengkapi chip keamanan NXP NTAG 424 terenkripsi dan nomor seri unik (Cert Number) yang terhubung ke basis data publik ICS.',
+          'Garansi keaslian sertifikat otomatis batal apabila casing akrilik terbukti pernah dibuka paksa, diretakkan, dimodifikasi, atau dipindahkan isinya ke wadah lain.',
+          'ICS berhak membekukan status sertifikat (is_frozen) pada ledger publik apabila ditemukan laporan kehilangan/pencurian resmi yang terverifikasi atau indikasi duplikasi fisik yang melanggar hukum.',
+        ],
+      },
+      {
+        id: 'akun-set-registry',
+        number: '05',
+        title: 'Akun Kolektor & Etika Ekosistem Set Registry',
+        content: [
+          'Pengguna bertanggung jawab penuh atas kerahasiaan kredensial akun (email dan kata sandi) pada portal ICS Set Registry & Vault.',
+          'Klaim kepemilikan nomor sertifikat ke dalam brankas digital hanya diperbolehkan untuk slab yang benar-benar berada dalam penguasaan fisik pengguna. Manipulasi klaim, spam, atau penggunaan identitas palsu dapat berakibat pada penangguhan akun dan penghapusan poin dari klasemen nasional.',
+        ],
+      },
+      {
+        id: 'hak-kekayaan-intelektual',
+        number: '06',
+        title: 'Hak Kekayaan Intelektual & Perubahan Ketentuan',
+        content: [
+          'Seluruh desain label sertifikat, struktur skor algoritma, logo, antarmuka situs, serta database Population Report merupakan kekayaan intelektual milik Indonesia Collectibles Standar (ICS) dan dilindungi undang-undang yang berlaku di Republik Indonesia.',
+          'ICS sewaktu-waktu dapat memperbarui Syarat & Ketentuan ini untuk menyesuaikan perkembangan teknologi keamanan maupun regulasi industri koleksi. Perubahan mulai berlaku efektif sejak dipublikasikan pada halaman ini.',
+        ],
+      },
+    ],
+    ctaBox: {
+      variant: 'warning',
+      title: 'Pertanyaan Terkait Regulasi & Klaim Sertifikat?',
+      descriptionPrefix:
+        'Apabila Anda memerlukan klarifikasi mengenai syarat pengiriman bernilai tinggi atau sengketa sertifikat, hubungi tim kepatuhan kami atau baca ',
+      relatedLinkLabel: 'Kebijakan Privasi ICS',
+      relatedLinkHref: '/privacy',
+      descriptionSuffix: '.',
+      buttonLabel: 'Hubungi Tim Legal ICS',
+      buttonHref: 'mailto:ics.official.registry@gmail.com?subject=Pertanyaan%20Syarat%20%26%20Ketentuan%20ICS',
+    },
+  },
+
+  privacy: {
+    lastUpdated: 'BERLAKU EFEKTIF: NOVEMBER 2026',
+    badgeText: 'DATA PROTECTION & PRIVACY POLICY',
+    titlePrefix: 'Kebijakan Privasi ',
+    titleAccent: 'ICS',
+    description:
+      'Indonesia Collectibles Standar (ICS) berkomitmen menjaga kerahasiaan identitas, kontak pribadi, serta keamanan aset digital setiap kolektor yang tergabung dalam ekosistem grading dan Set Registry kami.',
+    tocHeading: 'RINGKASAN KEBIJAKAN PRIVASI',
+    highlights: [
+      {
+        iconName: 'eye-off',
+        iconColorClass: 'text-emerald-400',
+        label: 'Kontak Pribadi Tersembunyi',
+      },
+      {
+        iconName: 'server',
+        iconColorClass: 'text-amber-400',
+        label: 'Enkripsi TLS & RLS Database',
+      },
+      {
+        iconName: 'user-cog',
+        iconColorClass: 'text-red-400',
+        label: 'Kontrol Penuh Pemilik Akun',
+      },
+    ],
+    sections: [
+      {
+        id: 'data-dikumpulkan',
+        number: '01',
+        title: 'Data Pribadi yang Kami Kumpulkan',
+        content: [
+          'Data Identitas & Kontak: Nama tampilan (display name), username unik, alamat email, nomor WhatsApp, serta kota/domisili yang Anda daftarkan saat membuat akun kolektor atau mengajukan pesanan grading.',
+          'Data Profil & Media: Foto avatar yang Anda unggah (disimpan secara aman pada infrastruktur penyimpanan cloud ICS) dan deskripsi bio kolektor.',
+          'Data Aset & Sertifikasi: Nomor sertifikat slab (Cert Number), detail spesifikasi kartu/koleksi, hasil sub-grade, riwayat klaim kepemilikan, serta log verifikasi chip Dual-NFC.',
+        ],
+      },
+      {
+        id: 'tujuan-penggunaan',
+        number: '02',
+        title: 'Tujuan Penggunaan Data',
+        content: [
+          'Memproses pesanan pengujian keaslian (grading), pengiriman kembali paket koleksi, serta notifikasi pembaruan status pengerjaan laboratorium.',
+          'Menampilkan profil publik pada ICS Set Registry, menghitung akumulasi poin koleksi, dan menyusun peringkat pada papan klasemen nasional secara akurat.',
+          'Mencegah penipuan, pemalsuan sertifikat, maupun klaim ganda atas satu nomor seri slab melalui sistem autentikasi terenkripsi.',
+        ],
+      },
+      {
+        id: 'visibilitas-publik',
+        number: '03',
+        title: 'Visibilitas Informasi Publik vs. Data Privat',
+        content: [
+          'Informasi yang tampil secara publik di portal Set Registry & Check ICS hanya mencakup username handle, nama tampilan, domisili umum (kota/negara), foto avatar, daftar slab yang diklaim ke brankas publik, serta statistik Population Report.',
+          'Alamat email, kata sandi terenkripsi, nomor WhatsApp, dan alamat pengiriman fisik Anda bersifat rahasia (privat) dan tidak pernah ditampilkan kepada publik maupun dijual kepada pihak ketiga mana pun.',
+        ],
+      },
+      {
+        id: 'keamanan-infrastruktur',
+        number: '04',
+        title: 'Keamanan & Penyimpanan Infrastruktur Cloud',
+        content: [
+          'Autentikasi akun kolektor dilindungi menggunakan enkripsi standar industri melalui Supabase Authentication dengan kebijakan Row-Level Security (RLS) yang membatasi akses tulis hanya kepada pemilik akun sah.',
+          'Seluruh komunikasi data antara peramban Anda dan server ICS dilindungi protokol HTTPS/TLS berlapis.',
+        ],
+      },
+      {
+        id: 'hak-pengguna',
+        number: '05',
+        title: 'Hak Akses, Pembaruan & Penghapusan Data',
+        content: [
+          'Anda memiliki hak penuh untuk mengakses, memperbarui informasi profil (bio, lokasi, foto avatar), maupun mengajukan penghapusan akun kolektor beserta data pribadi yang tersimpan di sistem kami.',
+          'Catatan riwayat populasi anonim (Population Report) dan status validitas nomor sertifikat slab yang pernah diterbitkan akan tetap dipertahankan di ledger untuk menjaga integritas pasar koleksi nasional.',
+        ],
+      },
+    ],
+    ctaBox: {
+      variant: 'accent',
+      title: 'Permintaan Perubahan atau Penghapusan Data Pribadi',
+      descriptionPrefix:
+        'Untuk pengajuan penghapusan akun atau pertanyaan seputar keamanan informasi, silakan hubungi administrator data kami atau tinjau ',
+      relatedLinkLabel: 'Syarat & Ketentuan Layanan',
+      relatedLinkHref: '/terms',
+      descriptionSuffix: '.',
+      buttonLabel: 'Ajukan Permintaan Data',
+      buttonHref: 'mailto:ics.official.registry@gmail.com?subject=Permintaan%20Privasi%20Data%20Kolektor%20ICS',
+    },
+  },
+};

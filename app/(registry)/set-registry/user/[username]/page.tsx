@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo, use, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, use, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import CollectorAvatar from '@/components/CollectorAvatar';
 import {
   UserCheck,
   ShieldCheck,
@@ -20,6 +21,14 @@ import {
   Loader2,
   Database,
   UserX,
+  Pencil,
+  X,
+  Camera,
+  User,
+  Phone,
+  FileText,
+  Save,
+  AlertCircle,
 } from 'lucide-react';
 
 interface PageProps {
@@ -34,6 +43,7 @@ interface CollectorRow {
   user_id: string | null;
   username: string;
   display_name: string;
+  whatsapp_no?: string | null;
   location: string | null;
   bio: string | null;
   avatar_bg: string;
@@ -75,6 +85,14 @@ interface UserSetProgress {
   completed: boolean;
   points: number;
 }
+
+const AVATAR_GRADIENTS = [
+  { label: 'Indigo Purple', value: 'from-indigo-500 to-purple-600' },
+  { label: 'Crimson Red', value: 'from-red-600 to-rose-700' },
+  { label: 'Amber Gold', value: 'from-amber-500 to-orange-600' },
+  { label: 'Emerald Jade', value: 'from-emerald-500 to-teal-700' },
+  { label: 'Cyber Blue', value: 'from-sky-500 to-blue-700' },
+];
 
 // =========================================================================
 // HELPER GAMBAR & FORMATTER
@@ -131,11 +149,29 @@ function UserVaultContent({ params }: PageProps) {
   const [activeTab, setActiveTab] = useState<'collection' | 'sets' | 'card'>('collection');
   const [copied, setCopied] = useState(false);
 
+  // State Auth User yang Sedang Login
+  const [currentAuthUserId, setCurrentAuthUserId] = useState<string | null>(null);
+
   // State Data Database
   const [loading, setLoading] = useState(true);
   const [collector, setCollector] = useState<CollectorRow | null>(null);
   const [allCollectors, setAllCollectors] = useState<CollectorRow[]>([]);
   const [allCards, setAllCards] = useState<CardRegistryRow[]>([]);
+
+  // State Modal Edit Profile
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editWhatsappNo, setEditWhatsappNo] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editAvatarBg, setEditAvatarBg] = useState(AVATAR_GRADIENTS[0].value);
+  const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
+  const [editAvatarPreview, setEditAvatarPreview] = useState<string | null>(null);
+
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccess, setEditSuccess] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -143,11 +179,12 @@ function UserVaultContent({ params }: PageProps) {
     async function fetchUserVaultData() {
       setLoading(true);
       try {
-        const [collectorsRes, cardsRes] = await Promise.all([
+        const [authRes, collectorsRes, cardsRes] = await Promise.all([
+          supabase.auth.getUser(),
           supabase
             .from('collectors')
             .select(
-              'id, user_id, username, display_name, location, bio, avatar_bg, manual_points, sets_completed, badge, join_date'
+              'id, user_id, username, display_name, whatsapp_no, location, bio, avatar_bg, manual_points, sets_completed, badge, join_date'
             ),
           supabase
             .from('card_registry')
@@ -159,6 +196,8 @@ function UserVaultContent({ params }: PageProps) {
 
         if (!isMounted) return;
 
+        setCurrentAuthUserId(authRes.data?.user?.id || null);
+
         const cols = (collectorsRes.data as CollectorRow[]) || [];
         const crds = (cardsRes.data as CardRegistryRow[]) || [];
 
@@ -169,7 +208,6 @@ function UserVaultContent({ params }: PageProps) {
           console.error('Error fetching card_registry:', cardsRes.error.message);
         }
 
-        // Cocokkan username case-insensitive (mendukung dengan atau tanpa '@')
         const targetLower = usernameParam.toLowerCase();
         const found =
           cols.find((c) => c.username.replace(/^@/, '').trim().toLowerCase() === targetLower) ||
@@ -191,6 +229,123 @@ function UserVaultContent({ params }: PageProps) {
     };
   }, [usernameParam]);
 
+  // Cek apakah visitor adalah pemilik akun profil ini
+  const isOwner = Boolean(
+    collector && currentAuthUserId && collector.user_id === currentAuthUserId
+  );
+
+  // Buka modal & isi nilai awal dari data collector
+  const openEditModal = () => {
+    if (!collector) return;
+    setEditError(null);
+    setEditSuccess(null);
+    setEditDisplayName(collector.display_name || '');
+    setEditWhatsappNo(collector.whatsapp_no || '');
+    setEditLocation(collector.location || 'Indonesia');
+    setEditBio(collector.bio || '');
+    setEditAvatarBg(collector.avatar_bg || AVATAR_GRADIENTS[0].value);
+    setEditAvatarFile(null);
+    setEditAvatarPreview(null);
+    setIsEditOpen(true);
+  };
+
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setEditError('Format file harus berupa gambar (JPG, PNG, atau WEBP).');
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setEditError('Ukuran maksimal foto profil adalah 3MB.');
+      return;
+    }
+
+    setEditError(null);
+    setEditAvatarFile(file);
+    setEditAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!collector || !isOwner) return;
+
+    if (!editDisplayName.trim()) {
+      setEditError('Nama tampilan tidak boleh kosong.');
+      return;
+    }
+
+    setSavingProfile(true);
+    setEditError(null);
+    setEditSuccess(null);
+
+    try {
+      let finalAvatarBg = editAvatarBg;
+
+      // 1. Jika user memilih foto baru, unggah ke Google Drive ICS
+      if (editAvatarFile) {
+        const cleanUsername = collector.username.replace(/^@/, '').trim().toLowerCase();
+        const uploadForm = new FormData();
+        uploadForm.append('file', editAvatarFile);
+        uploadForm.append('username', cleanUsername);
+
+        const uploadRes = await fetch('/api/upload-avatar', {
+          method: 'POST',
+          body: uploadForm,
+        });
+
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) {
+          setEditError(uploadData.error || 'Gagal mengunggah foto profil baru ke Google Drive.');
+          setSavingProfile(false);
+          return;
+        }
+        if (uploadData.url) {
+          finalAvatarBg = uploadData.url;
+        }
+      }
+
+      // 2. Update baris kolektor di tabel public.collectors
+      const updatedPayload = {
+        display_name: editDisplayName.trim(),
+        whatsapp_no: editWhatsappNo.trim() || null,
+        location: editLocation.trim() || 'Indonesia',
+        bio: editBio.trim() || null,
+        avatar_bg: finalAvatarBg,
+      };
+
+      const { error: updateError } = await supabase
+        .from('collectors')
+        .update(updatedPayload)
+        .eq('id', collector.id)
+        .eq('user_id', currentAuthUserId!);
+
+      if (updateError) {
+        setEditError(`Gagal menyimpan perubahan profil: ${updateError.message}`);
+        setSavingProfile(false);
+        return;
+      }
+
+      // 3. Sinkronkan state lokal secara instan
+      setCollector((prev) => (prev ? { ...prev, ...updatedPayload } : prev));
+      setAllCollectors((prev) =>
+        prev.map((item) => (item.id === collector.id ? { ...item, ...updatedPayload } : item))
+      );
+
+      setEditSuccess('Profil kolektor berhasil diperbarui!');
+      setTimeout(() => {
+        setIsEditOpen(false);
+        setEditSuccess(null);
+      }, 900);
+    } catch (err) {
+      console.error('Update profile error:', err);
+      setEditError('Terjadi kesalahan sistem saat menyimpan profil.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   // Kartu milik kolektor ini di card_registry
   const userCards = useMemo(() => {
     if (!collector) return [];
@@ -199,7 +354,7 @@ function UserVaultContent({ params }: PageProps) {
       .sort((a, b) => Number(b.final_grade || 0) - Number(a.final_grade || 0));
   }, [collector, allCards]);
 
-  // Hitung Peringkat Nasional kolektor ini dibanding seluruh kolektor di database
+  // Hitung Peringkat Nasional kolektor ini
   const nationalRankInfo = useMemo(() => {
     if (!collector) return { rank: null as number | null, totalPoints: 0 };
 
@@ -226,7 +381,7 @@ function UserVaultContent({ params }: PageProps) {
     };
   }, [collector, allCollectors, allCards]);
 
-  // Hitung Set yang sedang dibangun kolektor ini dari kartu miliknya
+  // Hitung Set yang sedang dibangun kolektor ini
   const activeSets: UserSetProgress[] = useMemo(() => {
     if (!collector || userCards.length === 0) return [];
 
@@ -323,7 +478,7 @@ function UserVaultContent({ params }: PageProps) {
       <div className="max-w-7xl mx-auto px-6 space-y-10">
 
         {/* ========================================================================= */}
-        {/* 1. TOP BREADCRUMB                                                         */}
+        {/* 1. TOP BREADCRUMB & ACTION BUTTONS                                        */}
         {/* ========================================================================= */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
@@ -333,21 +488,33 @@ function UserVaultContent({ params }: PageProps) {
             <ArrowLeft className="w-4 h-4" /> Kembali ke Klasemen
           </Link>
 
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="inline-flex items-center gap-2 text-xs font-bold text-foreground-hitam hover:text-accent bg-card-putih border border-line-putih px-4 py-2 rounded-xl transition-colors shadow-xs cursor-pointer"
-          >
-            {copied ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Tautan Tersalin!
-              </>
-            ) : (
-              <>
-                <Share2 className="w-3.5 h-3.5 text-accent" /> Bagikan Profil Vault
-              </>
+          <div className="flex items-center gap-2.5">
+            {isOwner && (
+              <button
+                type="button"
+                onClick={openEditModal}
+                className="inline-flex items-center gap-2 text-xs font-bold text-white bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl transition-colors shadow-md shadow-red-600/20 cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" /> Edit Profil
+              </button>
             )}
-          </button>
+
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-2 text-xs font-bold text-foreground-hitam hover:text-accent bg-card-putih border border-line-putih px-4 py-2 rounded-xl transition-colors shadow-xs cursor-pointer"
+            >
+              {copied ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Tautan Tersalin!
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5 text-accent" /> Bagikan Profil Vault
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* ========================================================================= */}
@@ -391,11 +558,14 @@ function UserVaultContent({ params }: PageProps) {
 
                   {/* Profile Avatar Box */}
                   <div className="relative">
-                    <div
-                      className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${userData.avatarBg} border-2 border-amber-500/50 flex items-center justify-center font-black text-3xl text-white shadow-2xl`}
-                    >
-                      {userData.rawUsername.charAt(0).toUpperCase()}
-                    </div>
+                    <CollectorAvatar
+                      avatarBg={userData.avatarBg}
+                      username={userData.rawUsername}
+                      sizeClass="w-24 h-24"
+                      textSizeClass="text-3xl"
+                      shapeClass="rounded-3xl"
+                      borderClass="border-2 border-amber-500/50 shadow-2xl"
+                    />
                     {userData.isTop1 && (
                       <span
                         className="absolute -bottom-2 -right-2 bg-amber-500 text-black p-1.5 rounded-full border-2 border-[#12151C]"
@@ -540,7 +710,6 @@ function UserVaultContent({ params }: PageProps) {
                         key={card.id}
                         className="bg-card-putih border border-line-putih hover:border-red-500/40 rounded-3xl p-5 space-y-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm group"
                       >
-                        {/* Photo Slab Showcase */}
                         <div className="relative aspect-[3/4] bg-elevated-putih rounded-2xl border border-line-putih-soft p-3 flex items-center justify-center overflow-hidden">
                           <Image
                             src={resolveValidImageUrl(card.front_image_url)}
@@ -554,7 +723,6 @@ function UserVaultContent({ params }: PageProps) {
                           </div>
                         </div>
 
-                        {/* Card Info */}
                         <div className="space-y-1.5">
                           <span className="text-[10px] font-mono text-subtle-hitam uppercase block">
                             CERT: {card.cert_number}
@@ -565,7 +733,6 @@ function UserVaultContent({ params }: PageProps) {
                           <p className="text-[11px] text-muted-hitam line-clamp-1">{card.set_name}</p>
                         </div>
 
-                        {/* Mini Sub-Grades Bar */}
                         <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono pt-2 border-t border-line-putih-soft">
                           <span className="bg-elevated-putih p-1.5 rounded text-muted-hitam">
                             Centering:{' '}
@@ -593,7 +760,6 @@ function UserVaultContent({ params }: PageProps) {
                           </span>
                         </div>
 
-                        {/* Action Link */}
                         <Link
                           href={`/check-ics?cert=${encodeURIComponent(card.cert_number)}`}
                           className="w-full bg-elevated-putih hover:bg-gray-200/70 dark:hover:bg-white/10 border border-line-putih text-foreground-hitam font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all"
@@ -646,7 +812,6 @@ function UserVaultContent({ params }: PageProps) {
 
                         <h3 className="text-base font-bold text-foreground-hitam">{set.title}</h3>
 
-                        {/* Progress Bar */}
                         <div className="w-full max-w-xl bg-elevated-putih border border-line-putih-soft h-2.5 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full ${set.completed ? 'bg-emerald-500' : 'bg-red-600'}`}
@@ -689,11 +854,9 @@ function UserVaultContent({ params }: PageProps) {
                   </p>
                 </div>
 
-                {/* Front & Back Card Design Visual */}
                 <div className="relative aspect-[1.58/1] bg-gradient-to-br from-[#171A21] via-[#12151C] to-[#0A0C10] border border-amber-500/50 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl overflow-hidden group">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/15 blur-3xl pointer-events-none rounded-full" />
 
-                  {/* Card Header */}
                   <div className="flex justify-between items-start relative z-10">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="w-6 h-6 text-amber-400" />
@@ -706,7 +869,6 @@ function UserVaultContent({ params }: PageProps) {
                     </span>
                   </div>
 
-                  {/* Card Middle */}
                   <div className="space-y-1 relative z-10">
                     <span className="text-[10px] text-gray-400 font-mono block">
                       MEMBER ID: {userData.memberCode}
@@ -717,7 +879,6 @@ function UserVaultContent({ params }: PageProps) {
                     <p className="text-xs text-gray-300 font-sans">{userData.displayName}</p>
                   </div>
 
-                  {/* Card Footer */}
                   <div className="flex justify-between items-end relative z-10 border-t border-white/10 pt-4 text-[10px] font-mono text-gray-400">
                     <span>
                       {userData.hasActiveNfc ? 'ENCRYPTED DUAL-NFC ACTIVE' : 'STANDARD REGISTRY LEDGER'}
@@ -731,6 +892,224 @@ function UserVaultContent({ params }: PageProps) {
         )}
 
       </div>
+
+      {/* ========================================================================= */}
+      {/* MODAL EDIT PROFIL KOLEKTOR (KHUSUS PEMILIK AKUN)                          */}
+      {/* ========================================================================= */}
+      {isEditOpen && isOwner && collector && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-card-putih border border-line-putih rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl space-y-5 relative my-8 animate-fadeIn">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-line-putih-soft pb-4">
+              <div>
+                <h2 className="text-lg font-extrabold text-foreground-hitam">
+                  Edit Profil Kolektor
+                </h2>
+                <p className="text-[11px] font-mono text-muted-hitam">
+                  Handle: {userData.username}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditOpen(false)}
+                disabled={savingProfile}
+                className="p-2 rounded-xl bg-elevated-putih hover:bg-red-500/10 text-muted-hitam hover:text-red-600 transition-colors cursor-pointer"
+                aria-label="Tutup Modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Alerts */}
+            {editError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-2 text-xs text-red-600 dark:text-red-400">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{editError}</span>
+              </div>
+            )}
+
+            {editSuccess && (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{editSuccess}</span>
+              </div>
+            )}
+
+            {/* Form Edit */}
+            <form onSubmit={handleSaveProfile} className="space-y-4">
+              {/* Avatar Upload / Gradient Picker */}
+              <div className="bg-elevated-putih border border-line-putih-soft rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
+                <div className="relative shrink-0">
+                  {editAvatarPreview ? (
+                    <img
+                      src={editAvatarPreview}
+                      alt="Preview Foto Baru"
+                      className="w-20 h-20 rounded-2xl object-cover border-2 border-red-500/50 shadow-md"
+                    />
+                  ) : (
+                    <CollectorAvatar
+                      avatarBg={editAvatarBg}
+                      username={userData.rawUsername}
+                      sizeClass="w-20 h-20"
+                      textSizeClass="text-2xl"
+                      shapeClass="rounded-2xl"
+                      borderClass="border-2 border-line-putih shadow-md"
+                    />
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute -bottom-2 -right-2 bg-red-600 hover:bg-red-500 text-white p-2 rounded-xl shadow-lg transition-colors cursor-pointer"
+                    title="Ganti Foto Profil"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEditFileChange}
+                    className="hidden"
+                  />
+                </div>
+
+                <div className="space-y-2 flex-1 text-center sm:text-left">
+                  <span className="text-xs font-bold text-foreground-hitam block">
+                    Foto Profil & Warna Avatar
+                  </span>
+                  <p className="text-[11px] text-muted-hitam">
+                    Unggah foto baru (maks. 3MB) atau gunakan warna gradien default:
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                    {AVATAR_GRADIENTS.map((grad) => (
+                      <button
+                        key={grad.value}
+                        type="button"
+                        onClick={() => {
+                          setEditAvatarFile(null);
+                          setEditAvatarPreview(null);
+                          setEditAvatarBg(grad.value);
+                        }}
+                        className={`w-6 h-6 rounded-full bg-gradient-to-br ${grad.value} cursor-pointer transition-transform ${
+                          !editAvatarPreview && editAvatarBg === grad.value
+                            ? 'ring-2 ring-offset-2 ring-red-600 scale-110'
+                            : 'opacity-75 hover:opacity-100'
+                        }`}
+                        title={grad.label}
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-[11px] font-bold text-accent hover:underline ml-1 cursor-pointer"
+                    >
+                      + Upload Foto
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Display Name */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground-hitam block">
+                  Nama Tampilan / Vault <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={editDisplayName}
+                    onChange={(e) => setEditDisplayName(e.target.value)}
+                    placeholder="Nama Tampilan Kolektor"
+                    className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam focus:outline-none focus:border-red-500/60"
+                  />
+                </div>
+              </div>
+
+              {/* WhatsApp & Lokasi */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-foreground-hitam block">
+                    Nomor WhatsApp (Privat)
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="tel"
+                      value={editWhatsappNo}
+                      onChange={(e) => setEditWhatsappNo(e.target.value)}
+                      placeholder="0812xxxxxxxx"
+                      className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam focus:outline-none focus:border-red-500/60"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-foreground-hitam block">
+                    Kota / Domisili
+                  </label>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={editLocation}
+                      onChange={(e) => setEditLocation(e.target.value)}
+                      placeholder="Jakarta, Indonesia"
+                      className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam focus:outline-none focus:border-red-500/60"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-foreground-hitam block">
+                  Bio Kolektor
+                </label>
+                <div className="relative">
+                  <FileText className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-3" />
+                  <textarea
+                    rows={3}
+                    value={editBio}
+                    onChange={(e) => setEditBio(e.target.value)}
+                    placeholder="Ceritakan fokus koleksi kartu atau figure favoritmu..."
+                    className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam focus:outline-none focus:border-red-500/60 resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-line-putih-soft">
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(false)}
+                  disabled={savingProfile}
+                  className="px-4 py-2.5 rounded-xl bg-elevated-putih border border-line-putih text-xs font-bold text-muted-hitam hover:text-foreground-hitam cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white text-xs font-bold shadow-lg shadow-red-600/25 flex items-center gap-1.5 cursor-pointer"
+                >
+                  {savingProfile ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" /> Simpan Perubahan
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

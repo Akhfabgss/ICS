@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import CollectorAvatar from '@/components/CollectorAvatar';
 import {
   Trophy,
   Crown,
@@ -398,11 +399,15 @@ export default function LeaderboardPage() {
 
                 {/* Collector Info */}
                 <div className="space-y-1.5 pt-2 relative z-10">
-                  <div
-                    className={`w-16 h-16 mx-auto rounded-full border-2 flex items-center justify-center font-black text-xl shadow-xl ${item.avatarStyle}`}
-                  >
-                    {item.rawUsername.charAt(0).toUpperCase()}
-                  </div>
+                  <CollectorAvatar
+                    avatarBg={item.avatarBg}
+                    username={item.rawUsername}
+                    sizeClass="w-16 h-16 mx-auto"
+                    textSizeClass="text-xl"
+                    shapeClass="rounded-full"
+                    borderClass="border-2 shadow-xl"
+                    fallbackBgClass={item.avatarStyle}
+                  />
 
                   <div className="pt-2">
                     <h3 className="text-base font-bold text-foreground-putih flex items-center justify-center gap-1">

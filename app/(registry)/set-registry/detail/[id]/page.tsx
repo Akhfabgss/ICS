@@ -612,7 +612,7 @@ function SetDetailContent({ params }: PageProps) {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <Link
-                            href={`/check-ics?cert=${encodeURIComponent(card.certId)}`}
+                            href={`/set-registry/check-ics?cert=${encodeURIComponent(card.certId)}`}
                             className="text-xs font-sans font-bold text-accent hover:text-red-500 inline-flex items-center gap-1 bg-elevated-putih border border-line-putih px-3 py-1.5 rounded-lg transition-all"
                           >
                             Cek Pop Report <ExternalLink className="w-3.5 h-3.5" />

@@ -30,7 +30,7 @@ export default function FooterRegistry() {
                   ICS SET REGISTRY & VAULT
                 </span>
                 <span className="text-[11px] font-mono text-red-600">
-                  OFFICIAL NATIONAL COLLECTOR LEADERBOARD
+                  Indonesia Collectibles Standar
                 </span>
               </div>
             </div>
@@ -90,7 +90,7 @@ export default function FooterRegistry() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/check-ics" className="hover:text-foreground-putih transition-colors">
+                  <Link href="/set-registry/check-ics" className="hover:text-foreground-putih transition-colors">
                     Verifikasi Serial Slab
                   </Link>
                 </li>
@@ -109,22 +109,22 @@ export default function FooterRegistry() {
               </h4>
               <ul className="space-y-2 text-muted-putih">
                 <li>
-                  <Link href="/" className="hover:text-foreground-putih transition-colors inline-flex items-center gap-1">
-                    Beranda ICS Grading <ArrowUpRight className="w-3 h-3" />
+                  <Link href="/" target="_blank" className="hover:text-foreground-putih transition-colors inline-flex items-center gap-1">
+                    Beranda ICS Grading
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="hover:text-foreground-putih transition-colors">
+                  <Link href="/pricing" target="_blank" className="hover:text-foreground-putih transition-colors">
                     Tarif & Paket Grading
                   </Link>
                 </li>
                 <li>
-                  <Link href="/services" className="hover:text-foreground-putih transition-colors">
+                  <Link href="/services" target="_blank" className="hover:text-foreground-putih transition-colors">
                     Katalog Layanan
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-foreground-putih transition-colors">
+                  <Link href="/contact" target="_blank" className="hover:text-foreground-putih transition-colors">
                     Hubungi Konsultan
                   </Link>
                 </li>

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import CollectorAvatar from '@/components/CollectorAvatar';
 import {
   Search,
   ShieldCheck,
@@ -22,6 +23,14 @@ import {
   FileCheck2,
   Loader2,
 } from 'lucide-react';
+
+interface CollectorInfo {
+  id: string;
+  username?: string;
+  display_name?: string;
+  full_name?: string;
+  avatar_bg?: string | null;
+}
 
 interface CollectorInfo {
   id: string;
@@ -555,10 +564,15 @@ function CheckIcsContent() {
 
                   {/* Owner Collector Badge */}
                   <div className="grid grid-cols-1 md:grid-cols-2 items-center justify-between p-3.5 bg-elevated-hitam border border-line-hitam-soft rounded-2xl text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-red-600/20 text-red-500 font-bold flex items-center justify-center">
-                        {collectorHandle ? collectorHandle.replace('@', '').charAt(0).toUpperCase() : 'U'}
-                      </div>
+                    <div className="flex items-center gap-2.5">
+                      <CollectorAvatar
+                        avatarBg={certData.collectors?.avatar_bg}
+                        username={collectorHandle || 'U'}
+                        sizeClass="w-8 h-8"
+                        textSizeClass="text-xs"
+                        shapeClass="rounded-full"
+                        fallbackBgClass="bg-red-600/20 text-red-500"
+                      />
                       <div>
                         <span className="text-subtle-putih text-[10px] block">PEMILIK TERDAFTAR</span>
                         <strong className="text-foreground-putih">
