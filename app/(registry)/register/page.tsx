@@ -35,7 +35,6 @@ export default function RegistryRegisterPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Form States sesuai kolom public.collectors + Supabase Auth
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -44,7 +43,6 @@ export default function RegistryRegisterPage() {
   const [location, setLocation] = useState('Indonesia');
   const [bio, setBio] = useState('');
 
-  // Avatar States (Upload ke Google Drive ICS atau pilih Gradient)
   const [selectedGradient, setSelectedGradient] = useState(AVATAR_GRADIENTS[0].value);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -91,7 +89,7 @@ export default function RegistryRegisterPage() {
     setLoading(true);
 
     try {
-      // 1. Cek apakah username sudah dipakai di public.collectors
+      // 1. Cek ketersediaan username di tabel public.collectors
       const { data: existingUser } = await supabase
         .from('collectors')
         .select('id')
@@ -104,7 +102,7 @@ export default function RegistryRegisterPage() {
         return;
       }
 
-      // 2. Upload foto profil ke Google Drive ICS jika user memilih file
+      // 2. Upload foto profil jika ada
       let finalAvatarBg = selectedGradient;
       if (avatarFile) {
         const uploadForm = new FormData();
@@ -147,7 +145,7 @@ export default function RegistryRegisterPage() {
 
       const authUserId = signUpData.user?.id || null;
 
-      // 4. Simpan profil kolektor ke tabel public.collectors
+      // 4. Simpan data murni ke tabel public.collectors (Tidak menyentuh profiles)
       const { error: insertError } = await supabase.from('collectors').insert({
         user_id: authUserId,
         username: cleanUsername,
@@ -156,7 +154,6 @@ export default function RegistryRegisterPage() {
         location: location.trim() || 'Indonesia',
         bio: bio.trim() || null,
         avatar_bg: finalAvatarBg,
-        // manual_points, sets_completed, badge, join_date otomatis memakai default database
       });
 
       if (insertError) {
@@ -166,7 +163,6 @@ export default function RegistryRegisterPage() {
         return;
       }
 
-      // 5. Cek apakah Supabase langsung memberikan session atau perlu verifikasi email
       if (signUpData.session) {
         router.push(`/set-registry/user/${cleanUsername}`);
       } else {
@@ -185,7 +181,6 @@ export default function RegistryRegisterPage() {
   return (
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 pb-20 flex items-center justify-center px-6 transition-colors duration-300">
       <div className="w-full max-w-2xl space-y-6">
-        {/* Back Link */}
         <Link
           href="/set-registry"
           className="inline-flex items-center gap-2 text-xs font-bold text-muted-hitam hover:text-accent transition-colors"
@@ -193,9 +188,7 @@ export default function RegistryRegisterPage() {
           <ArrowLeft className="w-4 h-4" /> Kembali ke Set Registry
         </Link>
 
-        {/* Register Card */}
         <div className="bg-card-putih border border-line-putih rounded-3xl p-7 sm:p-10 shadow-xl space-y-7">
-          {/* Header */}
           <div className="space-y-2 text-center">
             <div className="w-12 h-12 rounded-2xl bg-accent-soft border border-accent-border text-accent flex items-center justify-center mx-auto">
               <ShieldCheck className="w-6 h-6" />
@@ -208,7 +201,6 @@ export default function RegistryRegisterPage() {
             </p>
           </div>
 
-          {/* Error / Success Alerts */}
           {errorMsg && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-red-600 dark:text-red-400">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -221,19 +213,14 @@ export default function RegistryRegisterPage() {
               <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="space-y-2">
                 <p className="font-semibold">{successMsg}</p>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1 font-bold underline"
-                >
+                <Link href="/login" className="inline-flex items-center gap-1 font-bold underline">
                   Ke Halaman Login <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleRegister} className="space-y-5">
-            {/* Avatar Picker & Drive Upload */}
             <div className="bg-elevated-putih border border-line-putih-soft rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-5">
               <div className="relative shrink-0">
                 {avatarPreview ? (
@@ -254,7 +241,7 @@ export default function RegistryRegisterPage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute -bottom-2 -right-2 bg-red-600 hover:bg-red-500 text-white p-2 rounded-xl shadow-lg transition-colors cursor-pointer"
-                  title="Upload Foto Profil ke Drive ICS"
+                  title="Upload Foto Profil"
                 >
                   <Camera className="w-3.5 h-3.5" />
                 </button>
@@ -272,7 +259,7 @@ export default function RegistryRegisterPage() {
                   Foto Profil / Tema Avatar
                 </span>
                 <p className="text-[11px] text-muted-hitam">
-                  Unggah foto profil (otomatis tersimpan di Drive ICS, maks. 3MB) atau pilih warna gradien avatar:
+                  Unggah foto profil (maks. 3MB) atau pilih warna gradien avatar:
                 </p>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                   {AVATAR_GRADIENTS.map((grad) => (
@@ -303,7 +290,6 @@ export default function RegistryRegisterPage() {
               </div>
             </div>
 
-            {/* Grid 2 Kolom: Username & Display Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-foreground-hitam block">
@@ -340,7 +326,6 @@ export default function RegistryRegisterPage() {
               </div>
             </div>
 
-            {/* Grid 2 Kolom: Email & Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-foreground-hitam block">
@@ -378,7 +363,6 @@ export default function RegistryRegisterPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-subtle-hitam hover:text-foreground-hitam cursor-pointer"
-                    aria-label="Toggle Password"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -386,12 +370,9 @@ export default function RegistryRegisterPage() {
               </div>
             </div>
 
-            {/* Grid 2 Kolom: WhatsApp & Domisili */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground-hitam block">
-                  Nomor WhatsApp
-                </label>
+                <label className="text-xs font-bold text-foreground-hitam block">Nomor WhatsApp</label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -405,9 +386,7 @@ export default function RegistryRegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground-hitam block">
-                  Kota / Lokasi
-                </label>
+                <label className="text-xs font-bold text-foreground-hitam block">Kota / Lokasi</label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
@@ -421,11 +400,8 @@ export default function RegistryRegisterPage() {
               </div>
             </div>
 
-            {/* Bio Singkat */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-foreground-hitam block">
-                Bio Kolektor (Opsional)
-              </label>
+              <label className="text-xs font-bold text-foreground-hitam block">Bio Kolektor (Opsional)</label>
               <div className="relative">
                 <FileText className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-3.5" />
                 <textarea
@@ -455,7 +431,6 @@ export default function RegistryRegisterPage() {
             </button>
           </form>
 
-          {/* Footer Login Link */}
           <div className="pt-4 border-t border-line-putih-soft text-center">
             <p className="text-xs text-muted-hitam">
               Sudah memiliki akun kolektor ICS?{' '}
