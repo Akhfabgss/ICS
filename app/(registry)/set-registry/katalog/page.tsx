@@ -61,7 +61,7 @@ interface MainCategory {
 // =========================================================================
 // HELPER GAMBAR & FORMATTER LABEL DATABASE
 // =========================================================================
-const FALLBACK_CARD_IMAGE = '/images/home/card1.webp';
+const FALLBACK_CARD_IMAGE = '/images/home/card1.jpg';
 
 // Mapping label rapi untuk kode sub_types di database (POKEMON, ONE_PIECE, dll.)
 const SUB_TYPE_LABELS: Record<string, string> = {

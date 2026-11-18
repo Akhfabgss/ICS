@@ -154,7 +154,7 @@ export default function ServicesPage() {
             <div className="lg:col-span-5 flex justify-center items-center">
               <div className="lg:block h-full hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/images/home/card1.webp"
+                  src="/images/home/card1.jpg"
                   alt="ICS Graded Card 1"
                   width={180}
                   height={260}

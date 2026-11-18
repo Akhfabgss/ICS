@@ -29,7 +29,7 @@ export default function SubmitRegistryPage() {
     grade: '9.5 GEM MINT',
     pointsValue: '+1,850 PTS',
     ownerStatus: 'UNCLAIMED (Tersedia untuk Diklaim)',
-    image: '/images/home/card1.webp',
+    image: '/images/home/card1.jpg',
   };
 
   const handleVerifyCert = (e: React.FormEvent) => {

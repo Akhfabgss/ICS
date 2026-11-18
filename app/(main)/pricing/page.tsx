@@ -100,7 +100,7 @@ export default function PricingPage() {
                 }
               >
                 {isFeatured && tier.featured_label && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-0.5 rounded-full shadow-md text-center">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md text-center">
                     {tier.featured_label}
                   </div>
                 )}

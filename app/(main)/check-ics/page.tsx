@@ -163,6 +163,35 @@ function CheckIcsContent() {
     ? certData.collectors.username.replace('@', '')
     : 'kyoto';
 
+  // 1. Tambahkan fungsi helper ini di atas komponen atau di file terpisah
+  function resolveCardImageUrl(url: string | null | undefined): string {
+    if (!url) return '/images/home/card1.jpg';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('/')) return trimmed;
+
+    try {
+      const parsed = new URL(trimmed);
+
+      // Konversi link Google Drive ke endpoint thumbnail CDN agar bebas blokir CORS/ORB
+      if (parsed.hostname === 'drive.google.com' || parsed.hostname === 'docs.google.com') {
+        const fileMatch = parsed.pathname.match(/\/file\/d\/([^/]+)/);
+        const idParam = parsed.searchParams.get('id');
+        const driveId = fileMatch?.[1] || idParam;
+        if (driveId) {
+          return `https://drive.google.com/thumbnail?id=${driveId}&sz=w800`;
+        }
+      }
+
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return trimmed;
+      }
+    } catch {
+      // Fallback jika bukan URL valid
+    }
+
+    return '/images/home/card1.jpg';
+  }
+
   return (
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 md:pt-52 pb-20 transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-6 space-y-12">
@@ -347,7 +376,7 @@ function CheckIcsContent() {
                   <p className="text-xs text-muted-putih mt-0.5">
                     Terverifikasi pada Ledger ICS • Status:{' '}
                     <strong className={certData.is_frozen ? 'text-amber-400 font-normal' : 'text-emerald-400 font-normal'}>
-                      {certData.is_encapsulated ? 'AKTIF & SONIC ENCAPSULATED' : 'TERDAFTAR (NON-ENCAPSULATED)'}
+                      {certData.is_encapsulated ? 'Aktif & Sonic Encapsulated' : 'TERDAFTAR (NON-ENCAPSULATED)'}
                     </strong>
                   </p>
                 </div>
@@ -402,10 +431,9 @@ function CheckIcsContent() {
 
                   <div className="relative aspect-[3/4] bg-[#0A0C10] rounded-2xl border border-line-hitam p-4 flex items-center justify-center overflow-hidden group">
                     <Image
-                      src={
-                        (activeTab === 'front' ? certData.front_image_url : certData.back_image_url) ||
-                        '/images/home/card1.webp'
-                      }
+                      src={resolveCardImageUrl(
+                        activeTab === 'front' ? certData.front_image_url : certData.back_image_url
+                      )}
                       alt={certData.card_name}
                       width={320}
                       height={460}
@@ -605,16 +633,6 @@ function CheckIcsContent() {
 
             {/* Action Buttons Bar */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Tautan rekam jejak digital berhasil disalin!');
-                }}
-                className="bg-card-putih hover:bg-elevated-putih border border-line-putih text-foreground-hitam font-bold text-xs px-5 py-3 rounded-xl flex items-center gap-2 transition-all shadow-xs cursor-pointer"
-              >
-                <Share2 className="w-4 h-4 text-accent" /> Bagikan Rekam Jejak Digital
-              </button>
 
               <a
                 href="#"

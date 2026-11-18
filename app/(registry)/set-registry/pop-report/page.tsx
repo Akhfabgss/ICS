@@ -52,7 +52,7 @@ interface PopReportItem {
 // =========================================================================
 // HELPER GAMBAR & NORMALISASI KATEGORI
 // =========================================================================
-const FALLBACK_CARD_IMAGE = '/images/home/card1.webp';
+const FALLBACK_CARD_IMAGE = '/images/home/card1.jpg';
 
 function resolveValidImageUrl(url: string | null | undefined): string {
   if (!url) return FALLBACK_CARD_IMAGE;

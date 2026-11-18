@@ -37,7 +37,7 @@ export default function Home() {
         {/* Top-Left Card (Frame Hitam Kontras) */}
         <div className="hidden lg:block absolute top-8 left-6 w-18 xl:w-24 rotate-[-14deg] animate-float-slow hover:scale-105 transition-transform duration-300">
           <Image
-            src="/images/home/card1.webp"
+            src="/images/home/card1.jpg"
             alt="ICS Graded Card 1"
             width={180}
             height={260}
@@ -48,7 +48,7 @@ export default function Home() {
         {/* Bottom-Left Card */}
         <div className="hidden lg:block absolute bottom-12 left-16 w-18 xl:w-32 rotate-[12deg] animate-float-delayed hover:scale-105 transition-transform duration-300">
           <Image
-            src="/images/home/card1.webp"
+            src="/images/home/card2.jpg"
             alt="ICS Graded Card 1"
             width={180}
             height={260}
@@ -59,7 +59,7 @@ export default function Home() {
         {/* Top-Right Card */}
         <div className="hidden lg:block absolute top-10 right-8 w-18 xl:w-32 rotate-[15deg] animate-float-delayed hover:scale-105 transition-transform duration-300">
           <Image
-            src="/images/home/card1.webp"
+            src="/images/home/card3.jpg"
             alt="ICS Graded Card 1"
             width={180}
             height={260}
@@ -70,7 +70,7 @@ export default function Home() {
         {/* Bottom-Right Card */}
         <div className="hidden lg:block absolute bottom-24 right-14 w-18 xl:w-24 rotate-[-10deg] animate-float-slow hover:scale-105 transition-transform duration-300">
           <Image
-            src="/images/home/card1.webp"
+            src="/images/home/card4.jpg"
             alt="ICS Graded Card 1"
             width={180}
             height={260}
@@ -272,7 +272,7 @@ export default function Home() {
             <div className="relative w-full max-w-[850px] flex justify-end">
               <div className="hidden dark:block absolute inset-0 bg-red-600/10 blur-3xl rounded-full pointer-events-none" />
               <Image
-                src="/images/home/about.png"
+                src="/images/home/about2.png"
                 alt="ICS Collectible Authentication System Showcase"
                 width={1000}
                 height={700}
