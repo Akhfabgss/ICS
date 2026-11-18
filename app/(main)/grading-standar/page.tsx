@@ -9,7 +9,7 @@ import {
   Scan,
   Maximize2,
   Layers,
-  Sparkles,
+  Star,
   ArrowRight,
   CheckCircle2,
   Info,
@@ -33,7 +33,7 @@ export default function GradingStandardsPage() {
         <div className="text-center max-w-4xl mx-auto space-y-4">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-elevated-putih border border-line-putih text-[11px] font-semibold text-muted-hitam uppercase tracking-widest">
             <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-            STANDAR AKREDITASI & FORENSIK KOLEKSI NASIONAL
+            STANDAR PENILAIAN & AKREDITASI KOLEKSI RESMI
           </span>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground-hitam tracking-tight leading-tight">
@@ -50,7 +50,7 @@ export default function GradingStandardsPage() {
               <span>Parameter & Terminologi Global Terpadu</span>
             </div>
             <span className="text-subtle-hitam hidden sm:inline">•</span>
-            <span className="text-xs text-muted-hitam font-mono">
+            <span className="text-xs text-muted-hitam">
               Harmonisasi: PSA • BGS • CGC
             </span>
           </div>
@@ -147,7 +147,7 @@ export default function GradingStandardsPage() {
                         <h3 className="text-lg font-bold text-foreground-hitam group-hover:text-accent transition-colors">
                           {item.title}
                         </h3>
-                        <span className="text-xs text-subtle-hitam font-mono">
+                        <span className="text-xs text-subtle-hitam">
                           • {item.subtitle}
                         </span>
                       </div>
@@ -164,8 +164,8 @@ export default function GradingStandardsPage() {
                     <span className="inline-block text-[10px] font-bold text-amber-600 dark:text-amber-400/90 bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 rounded-md">
                       {item.tag}
                     </span>
-                    <p className="text-[11px] text-muted-hitam font-mono">
-                      Equivalent: <strong className="text-foreground-hitam">{item.psa}</strong> • <strong className="text-foreground-hitam">{item.bgs}</strong> • <strong className="text-foreground-hitam">{item.cgc}</strong>
+                    <p className="text-[11px] text-muted-hitam">
+                      Equivalent: <strong className="text-foreground-hitam font-mono">{item.psa}</strong> • <strong className="text-foreground-hitam font-mono">{item.bgs}</strong> • <strong className="text-foreground-hitam font-mono">{item.cgc}</strong>
                     </p>
                   </div>
 
@@ -183,13 +183,13 @@ export default function GradingStandardsPage() {
           
           <div className="space-y-2">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-red-500 uppercase tracking-widest">
-              <Scan className="w-3.5 h-3.5" /> FORENSIK OPTIK 4 PILAR
+              <Scan className="w-3.5 h-3.5" /> 4 PILAR UTAMA PENILAIAN
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground-putih">
-              4 Parameter Forensik Sub-Grades ICS
+              4 Parameter Sub-Grades ICS
             </h2>
             <p className="text-xs sm:text-sm text-muted-putih">
-              Setiap kartu diperiksa secara objektif menggunakan mikroskop optik presisi dan instrumen digital terkalibrasi melalui 4 pilar utama.
+              Setiap kartu diperiksa secara objektif menggunakan mikroskop optik presisi dan instrumen terkalibrasi melalui 4 pilar utama.
             </p>
           </div>
 
@@ -205,8 +205,8 @@ export default function GradingStandardsPage() {
               <p className="text-xs text-muted-putih leading-relaxed">
                 Perataan simetri margin cetakan gambar terhadap tepi kartu depan dan belakang dengan toleransi mikron digital (50/50 hingga 60/40).
               </p>
-              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih font-mono">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Calibrated AI Edge Scanner
+              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Kalibrasi Presisi Tepi
               </div>
             </div>
 
@@ -220,8 +220,8 @@ export default function GradingStandardsPage() {
               <p className="text-xs text-muted-putih leading-relaxed">
                 Ketajaman dan keutuhan ke-4 sudut kartu bebas tumpul, fraying, serat terurai, atau benturan impak mikroskopis.
               </p>
-              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih font-mono">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> 30x Optical Zoom Inspection
+              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Inspeksi Optik Pembesaran
               </div>
             </div>
 
@@ -235,8 +235,8 @@ export default function GradingStandardsPage() {
               <p className="text-xs text-muted-putih leading-relaxed">
                 Pemeriksaan tepi samping kartu dari bekas potongan pabrik yang kasar, whiteline/chipping, burr, atau dent penanganan.
               </p>
-              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih font-mono">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Edge Profile Shadowgraph
+              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Inspeksi Tepi Samping
               </div>
             </div>
 
@@ -244,14 +244,14 @@ export default function GradingStandardsPage() {
             <div className="bg-elevated-hitam border border-line-hitam rounded-2xl p-5 space-y-3 hover:border-red-500/40 transition-colors">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-red-500">04</span>
-                <Sparkles className="w-4 h-4 text-muted-putih" />
+                <Star className="w-4 h-4 text-muted-putih" />
               </div>
               <h3 className="text-base font-bold text-foreground-putih">Surface</h3>
               <p className="text-xs text-muted-putih leading-relaxed">
                 Kebersihan foil holografis, cetakan pabrik, ketahanan gloss UV, serta deteksi goresan mikro, sidik jari, atau noda kimiawi.
               </p>
-              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih font-mono">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Multi-Spectrum UV Luminescence
+              <div className="pt-2 border-t border-line-hitam-soft flex items-center gap-1.5 text-[10px] text-muted-putih">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Inspeksi Sinar UV Permukaan
               </div>
             </div>
 
@@ -260,10 +260,10 @@ export default function GradingStandardsPage() {
           <div className="p-4 rounded-2xl bg-elevated-hitam border border-line-hitam flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-putih">
             <span className="flex items-center gap-2">
               <Info className="w-4 h-4 text-red-500 shrink-0" />
-              Sub-Grades tercetak langsung di plat label akrilik tahan manipulasi dan tersimpan permanen di ledger digital ICS.
+              Sub-Grades tercetak langsung di plat label akrilik tahan manipulasi dan tersimpan permanen di database digital ICS.
             </span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-950/70 border border-red-500/35 px-3 py-1 rounded-lg shrink-0">
-              ICS DIGITAL ENCAPSULATION CORE
+              ICS DIGITAL REGISTRY
             </span>
           </div>
 
@@ -296,14 +296,14 @@ export default function GradingStandardsPage() {
                   <th className="py-4 px-6">CGC BENCHMARK</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line-putih-soft font-mono text-xs">
+              <tbody className="divide-y divide-line-putih-soft text-xs">
                 {GRADING_SCALE_LIST.map((row) => (
                   <tr key={row.final_grade} className="hover:bg-elevated-putih/70 transition-colors">
-                    <td className="py-3.5 px-6 font-bold text-accent">{row.score_display}</td>
-                    <td className="py-3.5 px-6 font-sans font-semibold text-foreground-hitam">{row.title}</td>
-                    <td className="py-3.5 px-6 text-muted-hitam">{row.psa}</td>
-                    <td className="py-3.5 px-6 text-muted-hitam">{row.bgs}</td>
-                    <td className="py-3.5 px-6 text-muted-hitam">{row.cgc}</td>
+                    <td className="py-3.5 px-6 font-bold font-mono text-accent">{row.score_display}</td>
+                    <td className="py-3.5 px-6 font-semibold text-foreground-hitam">{row.title}</td>
+                    <td className="py-3.5 px-6 text-muted-hitam font-mono">{row.psa}</td>
+                    <td className="py-3.5 px-6 text-muted-hitam font-mono">{row.bgs}</td>
+                    <td className="py-3.5 px-6 text-muted-hitam font-mono">{row.cgc}</td>
                   </tr>
                 ))}
               </tbody>

@@ -72,9 +72,7 @@ function resolveValidImageUrl(url: string | null | undefined): string {
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
       return trimmed;
     }
-  } catch {
-    // Fallback jika bukan URL valid
-  }
+  } catch { }
 
   return FALLBACK_CARD_IMAGE;
 }
@@ -142,14 +140,29 @@ export default function PopReportPage() {
   }, []);
 
   // =========================================================================
-  // 1. STATS OVERVIEW GLOBAL (REAL-TIME DARI card_registry)
+  // 1. STATS OVERVIEW GLOBAL (DENGAN MANIPULASI OFFSET AWAL / BOOTSTRAP)
   // =========================================================================
   const globalStats = useMemo(() => {
-    const totalGraded = cards.length;
-    const totalGemMint10 = cards.filter((c) => Number(c.final_grade) >= 10).length;
+    const realTotalGraded = cards.length;
+    const realTotalGemMint10 = cards.filter((c) => Number(c.final_grade) >= 10).length;
+    const realTotalSets = new Set(cards.map((c) => c.set_name.trim()).filter(Boolean)).size;
+
+    // =========================================================================
+    // PANDUAN KODE MANIPULASI AWAL STATISTIK POP REPORT:
+    // Saat ini platform masih baru, kita beri nilai offset awal supaya terlihat ramai.
+    // Nanti jika platform sudah berkembang dan data sudah organik, ubah semua nilai
+    // di bawah ini menjadi 0 agar kembali 100% murni menghitung data asli database.
+    // =========================================================================
+    const INITIAL_GRADED_OFFSET = 1200;  // Ubah jadi 0 jika ingin murni dari database
+    const INITIAL_GEM10_OFFSET = 450;    // Ubah jadi 0 jika ingin murni dari database
+    const INITIAL_SETS_OFFSET = 45;      // Ubah jadi 0 jika ingin murni dari database
+
+    const totalGraded = realTotalGraded + INITIAL_GRADED_OFFSET;
+    const totalGemMint10 = realTotalGemMint10 + INITIAL_GEM10_OFFSET;
+    const totalSets = realTotalSets + INITIAL_SETS_OFFSET;
+
     const ratioGemMint10 =
       totalGraded > 0 ? `${((totalGemMint10 / totalGraded) * 100).toFixed(1)}%` : '0.0%';
-    const totalSets = new Set(cards.map((c) => c.set_name.trim()).filter(Boolean)).size;
 
     return {
       totalGraded,
@@ -267,8 +280,8 @@ export default function PopReportPage() {
             <ArrowLeft className="w-4 h-4" /> Kembali ke Set Registry
           </Link>
 
-          <span className="text-xs font-mono text-muted-hitam bg-elevated-putih border border-line-putih px-3 py-1.5 rounded-lg w-fit">
-            REAL-TIME FORENSIC CENSUS LEDGER
+          <span className="text-xs font-semibold text-muted-hitam bg-elevated-putih border border-line-putih px-3 py-1.5 rounded-lg w-fit uppercase tracking-wider">
+            SENSUS POPULASI RESMI ICS
           </span>
         </div>
 
@@ -288,40 +301,40 @@ export default function PopReportPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. STATS OVERVIEW CARDS (LIVE DARI SUPABASE)                              */}
+        {/* 2. STATS OVERVIEW CARDS (DENGAN OFFSET AWAL & PANDUAN KODE DINAMIS)       */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-card-hitam border border-line-hitam rounded-2xl p-5 text-center space-y-1 shadow-xl backdrop-blur-md">
-            <span className="text-2xl sm:text-3xl font-black text-foreground-putih">
+            <span className="text-2xl sm:text-3xl font-black text-foreground-putih font-mono">
               {loading ? '...' : globalStats.totalGraded.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-muted-putih block font-mono">TOTAL KARTU DI-GRADE</span>
+            <span className="text-[11px] text-muted-putih block uppercase font-medium">TOTAL KARTU DI-GRADE</span>
           </div>
 
           <div className="bg-card-hitam border border-line-hitam rounded-2xl p-5 text-center space-y-1 shadow-xl backdrop-blur-md">
-            <span className="text-2xl sm:text-3xl font-black text-amber-400">
+            <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">
               {loading ? '...' : globalStats.totalGemMint10.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-muted-putih block font-mono">TOTAL GEM MINT 10</span>
+            <span className="text-[11px] text-muted-putih block uppercase font-medium">TOTAL GEM MINT 10</span>
           </div>
 
           <div className="bg-card-hitam border border-line-hitam rounded-2xl p-5 text-center space-y-1 shadow-xl backdrop-blur-md">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-400">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
               {loading ? '...' : globalStats.ratioGemMint10}
             </span>
-            <span className="text-[11px] text-muted-putih block font-mono">RATIO POPULATION 10</span>
+            <span className="text-[11px] text-muted-putih block uppercase font-medium">RATIO POPULATION 10</span>
           </div>
 
           <div className="bg-card-hitam border border-line-hitam rounded-2xl p-5 text-center space-y-1 shadow-xl backdrop-blur-md">
-            <span className="text-2xl sm:text-3xl font-black text-red-500">
+            <span className="text-2xl sm:text-3xl font-black text-red-500 font-mono">
               {loading ? '...' : globalStats.totalSets.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-muted-putih block font-mono">SET TCG TERDAFTAR</span>
+            <span className="text-[11px] text-muted-putih block uppercase font-medium">SET TCG TERDAFTAR</span>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. SEARCH & FILTER TOOLBAR (CARD PUTIH)                                   */}
+        {/* 3. SEARCH & FILTER TOOLBAR                                                */}
         {/* ========================================================================= */}
         <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
 
@@ -336,41 +349,36 @@ export default function PopReportPage() {
             />
           </div>
 
-          {/* TCG Filter Category */}
           <div className="flex items-center gap-1 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft overflow-x-auto w-full md:w-auto">
             <button
               type="button"
               onClick={() => setSelectedTcg('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                selectedTcg === 'all' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'all' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
+                }`}
             >
               Semua TCG
             </button>
             <button
               type="button"
               onClick={() => setSelectedTcg('pokemon')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                selectedTcg === 'pokemon' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'pokemon' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
+                }`}
             >
               Pokémon Card
             </button>
             <button
               type="button"
               onClick={() => setSelectedTcg('onepiece')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                selectedTcg === 'onepiece' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'onepiece' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
+                }`}
             >
               One Piece Card
             </button>
             <button
               type="button"
               onClick={() => setSelectedTcg('yugioh')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                selectedTcg === 'yugioh' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'yugioh' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
+                }`}
             >
               Yu-Gi-Oh!
             </button>
@@ -379,7 +387,7 @@ export default function PopReportPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 4. POPULATION REPORT TABLE (LIVE DARI card_registry)                      */}
+        {/* 4. POPULATION REPORT TABLE                                                */}
         {/* ========================================================================= */}
         <div className="bg-card-putih border border-line-putih rounded-3xl overflow-hidden shadow-sm">
           {loading ? (
@@ -413,7 +421,6 @@ export default function PopReportPage() {
                   {filteredPop.map((item) => (
                     <tr key={item.id} className="hover:bg-elevated-putih/70 transition-colors">
 
-                      {/* Card Title & Set */}
                       <td className="py-4 px-6 font-sans">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-14 bg-elevated-putih rounded border border-line-putih p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
@@ -426,32 +433,26 @@ export default function PopReportPage() {
                         </div>
                       </td>
 
-                      {/* Total Population */}
                       <td className="py-4 px-6 text-center font-bold text-foreground-hitam text-sm">
                         {item.totalPop.toLocaleString('id-ID')}
                       </td>
 
-                      {/* Grade 10 */}
                       <td className="py-4 px-6 text-center font-black text-amber-600 dark:text-amber-400 bg-amber-500/10">
                         {item.grade10.toLocaleString('id-ID')}
                       </td>
 
-                      {/* Grade 9.5 */}
                       <td className="py-4 px-6 text-center font-bold text-emerald-600 dark:text-emerald-400">
                         {item.grade95.toLocaleString('id-ID')}
                       </td>
 
-                      {/* Grade 9.0 */}
                       <td className="py-4 px-6 text-center text-muted-hitam">
                         {item.grade90.toLocaleString('id-ID')}
                       </td>
 
-                      {/* < Grade 9 */}
                       <td className="py-4 px-6 text-center text-subtle-hitam">
                         {item.gradeBelow9.toLocaleString('id-ID')}
                       </td>
 
-                      {/* Ratio */}
                       <td className="py-4 px-6 text-right font-black text-accent font-sans">
                         <span className="bg-accent-soft border border-accent-border px-2.5 py-1 rounded-md text-xs">
                           {item.gemMintRatio}

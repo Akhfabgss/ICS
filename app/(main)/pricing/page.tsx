@@ -310,11 +310,11 @@ export default function PricingPage() {
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-subtle-putih pt-4">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-red-500" /> Asuransi Pengiriman Aman Brinks
+                <ShieldCheck className="w-3.5 h-3.5 text-red-500" /> Garansi Asuransi Pengiriman Aman
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-red-500" /> Ultrasonic Tamper-Proof Enclosure
+                <Lock className="w-3.5 h-3.5 text-red-500" /> Slab Akrilik Sonic-Welded
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5">

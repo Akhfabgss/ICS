@@ -42,7 +42,7 @@ export default function SubmitRegistryPage() {
     setTimeout(() => {
       setIsVerifying(false);
       if (certInput.trim().toUpperCase() === 'INVALID' || certInput.trim().toUpperCase() === 'CLAIMED') {
-        setErrorMsg('Sertifikat ini sudah diklaim oleh pemilik lain atau tidak terdaftar di ledger.');
+        setErrorMsg('Sertifikat ini sudah diklaim oleh pemilik lain atau tidak terdaftar di database ICS.');
       } else {
         setStep(2);
       }
@@ -169,7 +169,7 @@ export default function SubmitRegistryPage() {
                   disabled={isVerifying}
                   className="w-full sm:flex-1 bg-red-600 hover:bg-red-500 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isVerifying ? 'Memeriksa Ledger...' : 'Verifikasi Sertifikat'} <ArrowRight className="w-4 h-4" />
+                  {isVerifying ? 'Memeriksa Database...' : 'Verifikasi Sertifikat'} <ArrowRight className="w-4 h-4" />
                 </button>
 
                 <button

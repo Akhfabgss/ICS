@@ -22,6 +22,7 @@ import {
   Cpu,
   FileCheck2,
   Loader2,
+  Star,
 } from 'lucide-react';
 
 interface CollectorInfo {
@@ -142,7 +143,7 @@ function CheckIcsContent() {
   };
 
   const formatAuditTimestamp = (isoString: string | null) => {
-    if (!isoString) return 'TERVERIFIKASI LEDGER';
+    if (!isoString) return 'TERVERIFIKASI DATABASE';
     return new Date(isoString).toLocaleString('id-ID', {
       day: '2-digit',
       month: 'long',
@@ -202,7 +203,7 @@ function CheckIcsContent() {
         <div className="text-center mx-auto space-y-4 max-w-4xl">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-elevated-putih border border-line-putih text-[11px] font-semibold text-muted-hitam uppercase tracking-widest">
             <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-            ENCRYPTED LEDGER & FORENSIC VERIFICATION ENGINE
+            VERIFIKASI RESMI SERTIFIKAT & DATABASE ICS
           </span>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground-hitam tracking-tight leading-tight">
@@ -210,7 +211,7 @@ function CheckIcsContent() {
           </h1>
 
           <p className="text-muted-hitam text-sm sm:text-base leading-relaxed">
-            Masukkan Nomor Sertifikat ICS atau gunakan pemindai QR/NFC untuk membuka laporan pemeriksaan resmi dan rekam jejak aset terenkripsi.
+            Masukkan Nomor Sertifikat ICS atau gunakan pemindai QR/NFC untuk membuka rincian kartu dan keaslian penilaian resmi.
           </p>
         </div>
 
@@ -257,7 +258,7 @@ function CheckIcsContent() {
 
           {/* Quick Demo Code Hints */}
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-2 border-t border-line-hitam-soft">
-            <span className="text-subtle-putih font-medium">Uji Coba Database Ledger:</span>
+            <span className="text-subtle-putih font-medium">Contoh Sertifikat:</span>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -269,9 +270,9 @@ function CheckIcsContent() {
               <button
                 type="button"
                 onClick={() => fetchCertificate('NOTFOUND')}
-                className="text-[11px] font-mono text-rose-400 hover:text-rose-300 bg-rose-950/40 px-2.5 py-1 rounded-md border border-rose-500/30 transition-colors cursor-pointer"
+                className="text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-950/40 px-2.5 py-1 rounded-md border border-rose-500/30 transition-colors cursor-pointer"
               >
-                Simulasi Tidak Sah
+                Contoh Tidak Ditemukan
               </button>
             </div>
           </div>
@@ -298,7 +299,7 @@ function CheckIcsContent() {
                     Siap Memeriksa Keaslian Koleksimu
                   </h3>
                   <p className="text-xs sm:text-sm text-muted-putih leading-relaxed">
-                    Ketik ID Sertifikat di kolom atas atau pemindai chip NFC / QR Code pada slab akrilik ICS untuk mendapatkan data forensik real-time.
+                    Ketik ID Sertifikat di kolom atas atau scan QR Code / chip NFC pada slab akrilik ICS untuk melihat data sertifikasi resmi.
                   </p>
                 </div>
               </div>
@@ -319,9 +320,9 @@ function CheckIcsContent() {
                 <div className="p-2.5 rounded-xl bg-elevated-putih border border-line-putih text-accent w-fit">
                   <Cpu className="w-5 h-5" />
                 </div>
-                <h4 className="text-xs font-bold text-foreground-hitam">2. Dekripsi Ledger Digital</h4>
+                <h4 className="text-xs font-bold text-foreground-hitam">2. Sinkronisasi Database Resmi</h4>
                 <p className="text-xs text-muted-hitam leading-relaxed">
-                  Sistem langsung mengotentikasi kecocokan tanda tangan kriptografi dengan database pusat ICS.
+                  Sistem mencocokkan nomor sertifikat dan parameter kartu langsung dengan database pusat ICS.
                 </p>
               </div>
 
@@ -329,7 +330,7 @@ function CheckIcsContent() {
                 <div className="p-2.5 rounded-xl bg-elevated-putih border border-line-putih text-accent w-fit">
                   <FileCheck2 className="w-5 h-5" />
                 </div>
-                <h4 className="text-xs font-bold text-foreground-hitam">3. Tampilan Hasil Forensik</h4>
+                <h4 className="text-xs font-bold text-foreground-hitam">3. Rincian Hasil Penilaian</h4>
                 <p className="text-xs text-muted-hitam leading-relaxed">
                   Dapatkan transparansi 4 parameter sub-grades, foto resolusi tinggi, dan status enkapsulasi.
                 </p>
@@ -362,7 +363,7 @@ function CheckIcsContent() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-foreground-putih">ICS VERIFIED RECORD</h3>
+                    <h3 className="text-sm font-bold text-foreground-putih">SERTIFIKAT RESMI TERVERIFIKASI</h3>
                     {certData.is_frozen ? (
                       <span className="text-[10px] font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30">
                         FROZEN / DALAM PENINJAUAN
@@ -374,7 +375,7 @@ function CheckIcsContent() {
                     )}
                   </div>
                   <p className="text-xs text-muted-putih mt-0.5">
-                    Terverifikasi pada Ledger ICS • Status:{' '}
+                    Terdaftar di Database Resmi ICS • Status:{' '}
                     <strong className={certData.is_frozen ? 'text-amber-400 font-normal' : 'text-emerald-400 font-normal'}>
                       {certData.is_encapsulated ? 'Aktif & Sonic Encapsulated' : 'TERDAFTAR (NON-ENCAPSULATED)'}
                     </strong>
@@ -383,8 +384,8 @@ function CheckIcsContent() {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="text-right text-xs text-muted-putih font-mono">
-                  <span className="block text-[10px] text-subtle-putih uppercase">Tercatat Pada Ledger</span>
+                <div className="text-right text-xs text-muted-putih">
+                  <span className="block text-[10px] text-subtle-putih uppercase">Tanggal Penerbitan</span>
                   <span className="text-foreground-putih font-semibold">{formatAuditTimestamp(certData.created_at)}</span>
                 </div>
                 <button
@@ -449,13 +450,17 @@ function CheckIcsContent() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center text-[11px] text-muted-putih font-mono px-1">
+                  <div className="flex justify-between items-center text-[11px] text-muted-putih px-1">
                     <span className="flex items-center gap-1">
                       <Radio className="w-3.5 h-3.5 text-red-500" />{' '}
-                      {certData.nfc_uid ? `NFC: ${certData.nfc_uid}` : 'NFC Chip Active'}
+                      {certData.nfc_uid ? (
+                        <>NFC: <span className="font-mono font-medium">{certData.nfc_uid}</span></>
+                      ) : (
+                        'NFC Chip Terdaftar'
+                      )}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-red-500" /> Tamper-Proof Seal
+                    <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Sertifikat Terverifikasi
                     </span>
                   </div>
                 </div>
@@ -465,7 +470,7 @@ function CheckIcsContent() {
 
                   <div className="space-y-1.5 border-b border-line-hitam-soft pb-5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold text-red-500 uppercase tracking-widest">
+                      <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
                         {certData.tcg_type || 'TCG'} • {certData.language || 'Japanese'}
                       </span>
                       {certData.card_number && (
@@ -492,34 +497,34 @@ function CheckIcsContent() {
                         </span>
                       </div>
                       <p className="text-xs text-muted-putih mt-1">
-                        Hasil Audit Forensik Resmi Indonesia Card Slab
+                        Penilaian Resmi Standar Indonesia Card Slab
                       </p>
-                      <p className="text-[11px] text-amber-400 font-mono mt-0.5">
-                        Registry Score Value: +{certData.points.toLocaleString('id-ID')} PTS
+                      <p className="text-[11px] text-amber-400 mt-0.5 font-medium">
+                        Poin Set Registry: <span className="font-mono font-bold">+{certData.points.toLocaleString('id-ID')} PTS</span>
                       </p>
                     </div>
 
-                    <div className="w-14 h-14 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-500 flex items-center justify-center font-black text-xl shrink-0">
-                      {Number(certData.final_grade) === 10 ? '10' : Number(certData.final_grade).toFixed(1)}
+                    <div className="w-14 h-14 rounded-2xl bg-red-600/15 border border-red-500/30 text-red-500 flex items-center justify-center shrink-0" title="Grade ICS Verified">
+                      <Star className="w-7 h-7 fill-red-500/30 text-red-500" />
                     </div>
                   </div>
 
                   {/* Metadata Specs Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3">
-                      <span className="text-subtle-putih text-[10px] block uppercase font-mono">NOMOR SERTIFIKAT</span>
+                      <span className="text-subtle-putih text-[10px] block uppercase">NOMOR SERTIFIKAT</span>
                       <span className="font-bold font-mono text-foreground-putih mt-0.5 block truncate">{certData.cert_number}</span>
                     </div>
                     <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3">
-                      <span className="text-subtle-putih text-[10px] block uppercase font-mono">TANGGAL GRADING</span>
+                      <span className="text-subtle-putih text-[10px] block uppercase">TANGGAL GRADING</span>
                       <span className="font-bold text-foreground-putih mt-0.5 block">{formatTanggal(certData.created_at)}</span>
                     </div>
                     <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3">
-                      <span className="text-subtle-putih text-[10px] block uppercase font-mono">BAHASA / EDISI</span>
+                      <span className="text-subtle-putih text-[10px] block uppercase">BAHASA / EDISI</span>
                       <span className="font-bold text-emerald-400 mt-0.5 block">{certData.language || 'Japanese'}</span>
                     </div>
                     <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3">
-                      <span className="text-subtle-putih text-[10px] block uppercase font-mono">LAB PEMERIKSA</span>
+                      <span className="text-subtle-putih text-[10px] block uppercase">LAB PEMERIKSA</span>
                       <span className="font-bold text-foreground-putih mt-0.5 block">Lab Forensik JKT</span>
                     </div>
                   </div>
@@ -527,8 +532,8 @@ function CheckIcsContent() {
                   {/* 4 Parameter Sub-Grades Bar */}
                   <div className="space-y-3 pt-2">
                     <div className="flex items-center justify-between text-xs font-bold text-foreground-putih">
-                      <span>Sub-Grade Forensik 4 Parameter</span>
-                      <span className="text-[10px] text-subtle-putih font-mono">Standar ISO/IEC 17025</span>
+                      <span>Rincian Sub-Grade 4 Parameter</span>
+                      <span className="text-[10px] text-subtle-putih">Skala Standar ICS</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -540,7 +545,7 @@ function CheckIcsContent() {
                         <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                           <div className="bg-emerald-500 h-full" style={{ width: `${certData.sub_centering * 10}%` }} />
                         </div>
-                        <span className="text-[10px] text-subtle-putih block font-mono">Precision Laser Calibration</span>
+                        <span className="text-[10px] text-subtle-putih block">Rasio Simetri Kartu</span>
                       </div>
 
                       <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3 space-y-1.5">
@@ -551,7 +556,7 @@ function CheckIcsContent() {
                         <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                           <div className="bg-emerald-500 h-full" style={{ width: `${certData.sub_corners * 10}%` }} />
                         </div>
-                        <span className="text-[10px] text-subtle-putih block font-mono">30x Optical Inspection</span>
+                        <span className="text-[10px] text-subtle-putih block">Inspeksi Presisi Sudut</span>
                       </div>
 
                       <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3 space-y-1.5">
@@ -562,7 +567,7 @@ function CheckIcsContent() {
                         <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                           <div className="bg-emerald-500 h-full" style={{ width: `${certData.sub_edges * 10}%` }} />
                         </div>
-                        <span className="text-[10px] text-subtle-putih block font-mono">Micro Factory Spec</span>
+                        <span className="text-[10px] text-subtle-putih block">Inspeksi Tepi & Potongan</span>
                       </div>
 
                       <div className="bg-elevated-hitam border border-line-hitam-soft rounded-xl p-3 space-y-1.5">
@@ -573,7 +578,7 @@ function CheckIcsContent() {
                         <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                           <div className="bg-emerald-500 h-full" style={{ width: `${certData.sub_surface * 10}%` }} />
                         </div>
-                        <span className="text-[10px] text-subtle-putih block font-mono">Foil & Print Layer Check</span>
+                        <span className="text-[10px] text-subtle-putih block">Inspeksi Permukaan & Foil</span>
                       </div>
                     </div>
                   </div>
@@ -582,7 +587,7 @@ function CheckIcsContent() {
                   {certData.grader_notes && (
                     <div className="bg-elevated-hitam border border-line-hitam-soft rounded-2xl p-4 text-xs space-y-1">
                       <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest block">
-                        CATATAN FORENSIK SENIOR GRADER
+                        CATATAN TIM PENILAI (GRADER)
                       </span>
                       <p className="text-muted-putih italic leading-relaxed">
                         &ldquo;{certData.grader_notes}&rdquo;
@@ -665,10 +670,10 @@ function CheckIcsContent() {
 
             <div className="space-y-2">
               <h3 className="text-xl font-extrabold text-foreground-putih">
-                PERINGATAN: Sertifikat &ldquo;{certInput}&rdquo; Tidak Terdaftar Dalam Ledger ICS
+                PERINGATAN: Sertifikat &ldquo;{certInput}&rdquo; Tidak Ditemukan di Database ICS
               </h3>
               <p className="text-xs sm:text-sm text-muted-putih leading-relaxed">
-                Jika nomor sertifikat tidak memunculkan data terverifikasi atau segel slab fisik rusak/terbuka, waspadai indikasi rekondisi atau slab tiruan. Setiap sertifikat resmi ICS tercatat permanen pada ledger tanpa jeda indeks.
+                Jika nomor sertifikat tidak memunculkan data terverifikasi atau segel slab fisik rusak/terbuka, waspadai indikasi rekondisi atau slab tiruan. Setiap sertifikat resmi ICS tercatat permanen di database resmi ICS.
               </p>
             </div>
 
@@ -707,7 +712,7 @@ function CheckIcsContent() {
 
 export default function CheckIcsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-surface pt-40 text-center text-muted-hitam text-sm">Memuat mesin verifikasi...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-surface pt-40 text-center text-muted-hitam text-sm">Memuat data sertifikat...</div>}>
       <CheckIcsContent />
     </Suspense>
   );

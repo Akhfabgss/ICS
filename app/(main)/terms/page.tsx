@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   ShieldCheck,
   FileCheck2,
-  Sparkles,
+  Star,
   CheckCircle2,
   AlertTriangle,
   Mail,
@@ -24,7 +24,7 @@ function renderHighlightIcon(iconName: LegalHighlightItem['iconName'], className
     case 'file-check':
       return <FileCheck2 className={`w-4 h-4 shrink-0 ${className}`} />;
     default:
-      return <Sparkles className={`w-4 h-4 shrink-0 ${className}`} />;
+      return <Star className={`w-4 h-4 shrink-0 ${className}`} />;
   }
 }
 
@@ -86,7 +86,7 @@ export default function TermsPage() {
 
         {/* 3. QUICK JUMP TABLE OF CONTENTS (CARD PUTIH) */}
         <div className="bg-card-putih border border-line-putih rounded-2xl p-5 sm:p-6 shadow-xs space-y-3">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-muted-hitam block">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-hitam block">
             {data.tocHeading}
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">

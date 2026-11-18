@@ -96,7 +96,7 @@ export default function ContactPage() {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-subtle-putih text-[10px] block uppercase font-mono">Layanan WhatsApp & Hotline</span>
+                    <span className="text-subtle-putih text-[10px] block uppercase font-medium">Layanan WhatsApp & Hotline</span>
                     <a
                       href="https://wa.me/625693228743"
                       target="_blank"
@@ -115,7 +115,7 @@ export default function ContactPage() {
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-subtle-putih text-[10px] block uppercase font-mono">Email Resmi Support</span>
+                    <span className="text-subtle-putih text-[10px] block uppercase font-medium">Email Resmi Support</span>
                     <a
                       href="mailto:ics.official.registry@gmail.com"
                       className="font-bold text-foreground-putih hover:text-red-400 transition-colors"
@@ -132,7 +132,7 @@ export default function ContactPage() {
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-subtle-putih text-[10px] block uppercase font-mono">Markas & Lab Forensik ICS</span>
+                    <span className="text-subtle-putih text-[10px] block uppercase font-medium">Kantor & Laboratorium ICS</span>
                     <p className="font-bold text-foreground-putih leading-snug">
                       Bogor & Jakarta, Indonesia
                     </p>
@@ -146,7 +146,7 @@ export default function ContactPage() {
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-subtle-putih text-[10px] block uppercase font-mono">Jam Operasional Laboratorium</span>
+                    <span className="text-subtle-putih text-[10px] block uppercase font-medium">Jam Operasional Laboratorium</span>
                     <p className="font-bold text-foreground-putih">Senin – Jumat: 09:00 – 17:00 WIB</p>
                     <p className="text-[11px] text-muted-putih mt-0.5">Sabtu, Minggu & Hari Libur Nasional: Tutup</p>
                   </div>

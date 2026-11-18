@@ -7,7 +7,7 @@ import {
   Package,
   Car,
   Coins,
-  Sparkles,
+  Star,
   BookOpen,
   PackageCheck,
   Gamepad2,
@@ -61,7 +61,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
 // ============================================================================
 export interface ServiceCategoryShowcase {
   id: string;
-  tcg_type: string; 
+  tcg_type: string;
   title: string;
   description: string;
   status: 'active' | 'coming_soon' | 'planned'; // Tambahan lokal
@@ -110,7 +110,7 @@ export const SERVICE_CATEGORIES_SHOWCASE: ServiceCategoryShowcase[] = [
     ],
     cta_label: 'Ingatkan Saat Rilis',
   },
-    {
+  {
     id: 'comic',
     tcg_type: 'COMICS',
     title: 'Comics & Manga Grading',
@@ -118,7 +118,7 @@ export const SERVICE_CATEGORIES_SHOWCASE: ServiceCategoryShowcase[] = [
     status: 'planned',
     badge_text: 'PLANNED EXPANSION',
     is_featured: false,
-    icon: BookOpen, 
+    icon: BookOpen,
     feature_heading: 'Spesifikasi Layanan:',
     features: [
       'Paper Quality, Spine Roll & Cover Gloss Grading',
@@ -147,7 +147,7 @@ export const PRICING_CATEGORIES: PricingCategoryTab[] = [
   { id: 'tcg', tcg_type: 'TCG', label: 'Card / TCG', icon: CreditCard, active: true },
   { id: 'figure', tcg_type: 'ACTION_FIGURE', label: 'Action Figure', icon: Package, active: false },
   { id: 'comics', tcg_type: 'COMICS', label: 'Comic', icon: BookOpen, active: false },
-  { id: 'photocard', tcg_type: 'PHOTOCARD', label: 'Photocard', icon: Sparkles, active: false },
+  { id: 'photocard', tcg_type: 'PHOTOCARD', label: 'Photocard', icon: Star, active: false },
   { id: 'retro-games', tcg_type: 'RETRO_GAMES', label: 'Retro Video Games', icon: Gamepad2, active: false },
   { id: 'lego', tcg_type: 'LEGO', label: 'LEGO Minifigures', icon: Boxes, active: false },
   { id: 'coins', tcg_type: 'COINS', label: 'Coins & Banknotes', icon: Coins, active: false },
@@ -181,7 +181,7 @@ export const PRICING_TIERS: PricingTier[] = [
     badge_style: 'amber',
     sla_code: 'BATCH 01',
     sla_note: 'SLA Pengerjaan Perkenalan',
-    description: 'Cocok untuk 20–30 kartu pertama. Membantu menguji proses operasional dan membangun portofolio awal.',
+    description: 'Cocok untuk 20–30 kartu pertama setiap batch nya. sebagai langkah pengembangan ICS',
     price: 150000,
     price_formatted: 'Rp 150.000',
     unit: '/ kartu',
@@ -193,7 +193,7 @@ export const PRICING_TIERS: PricingTier[] = [
       'Pencatatan Permanen di Database Digital ICS',
     ],
     cta_label: "Pesan Tier Founder's",
-    cta_href: '/order/founders',
+    cta_href: 'https://docs.google.com/forms/d/e/1FAIpQLSfJwltK1BBXswOVU8UOT3nrEbzb-XbQhO0594ozh-i9YRMZNA/viewform?usp=header',
   },
   {
     id: 'tier-standard',
@@ -211,12 +211,12 @@ export const PRICING_TIERS: PricingTier[] = [
     featured_label: 'RECOMMENDED / UTAMA',
     features: [
       "Semua fitur yang ada di Founder's Batch",
-      'Stiker Segel Hologram Keamanan (Anti-Tamper)',
+      'Stiker Segel Hologram Keamanan (Sonic-Weld)',
       'Tag Dual NFC & QR Code Verification',
-      'Foto Dokumentasi HD Forensik di Database ICS',
+      'Foto Dokumentasi HD di Database ICS',
     ],
     cta_label: 'Pesan Paket Standard',
-    cta_href: '/order/standard',
+    cta_href: 'https://docs.google.com/forms/d/e/1FAIpQLSfJwltK1BBXswOVU8UOT3nrEbzb-XbQhO0594ozh-i9YRMZNA/viewform?usp=header',
   },
   {
     id: 'tier-priority',
@@ -238,7 +238,7 @@ export const PRICING_TIERS: PricingTier[] = [
       'Notifikasi Pembaruan Status Real-Time via WA/Email',
     ],
     cta_label: 'Pesan Paket Priority',
-    cta_href: '/order/priority',
+    cta_href: 'https://docs.google.com/forms/d/e/1FAIpQLSfJwltK1BBXswOVU8UOT3nrEbzb-XbQhO0594ozh-i9YRMZNA/viewform?usp=header',
   },
 ];
 
@@ -250,7 +250,7 @@ export interface PricingFaq {
 export const PRICING_FAQS: PricingFaq[] = [
   {
     q: "Apa perbedaan mendasar Founder's Batch vs Standard?",
-    a: "Founder's Batch adalah paket perkenalan berkuota terbatas (20–30 kartu awal) dengan harga promo Rp150.000 untuk membangun portofolio awal. Layanan Standard (Rp199.000) adalah tarif operasional reguler dengan jaminan pengerjaan yang stabil.",
+    a: "Founder's Batch adalah paket perkenalan berkuota terbatas (20–30 kartu awal) dengan harga promo Rp150.000 di setiap batch nya. Layanan Standard (Rp199.000) adalah tarif operasional reguler dengan jaminan pengerjaan yang stabil.",
   },
   {
     q: 'Berapa lama estimasi pengerjaan untuk masing-masing tier?',
@@ -438,13 +438,13 @@ export const UPCOMING_CATEGORIES: UpcomingCategoryItem[] = [
     description: 'Kelenturan kertas, retensi gloss cover, deteksi spine roll, karat staples vintage, dan enkapsulasi archival acid-free.',
     target: 'Target: Q4 2026',
   },
-{
+  {
     id: 'photocard',
     tcg_type: 'PHOTOCARD',
     title: 'Photocard (K-Pop & Idol)',
     status: 'COMING SOON',
     status_color: 'bg-elevated-putih text-muted-hitam border-line-putih',
-    icon: Sparkles,
+    icon: Star,
     description: 'Penilaian kartu idola resmi agensi vs fanmade, analisis album press mark, dan proteksi micro-slab ultrasonik compact.',
     target: 'Target: Q3 2026',
   },
@@ -482,7 +482,7 @@ export const UPCOMING_CATEGORIES: UpcomingCategoryItem[] = [
 
 
 export interface LegalHighlightItem {
-  iconName: 'shield-check' | 'file-check' | 'sparkles' | 'eye-off' | 'server' | 'user-cog';
+  iconName: 'shield-check' | 'file-check' | 'star' | 'eye-off' | 'server' | 'user-cog';
   iconColorClass: string;
   label: string;
 }
@@ -539,7 +539,7 @@ export const ICS_LEGAL_DATA: {
         label: 'Segel Ultrasonik & NFC',
       },
       {
-        iconName: 'sparkles',
+        iconName: 'star',
         iconColorClass: 'text-red-400',
         label: 'Transparansi Pop Report',
       },
@@ -551,7 +551,7 @@ export const ICS_LEGAL_DATA: {
         title: 'Ketentuan Umum & Ruang Lingkup Layanan',
         content: [
           'Dengan mengakses situs web, mendaftarkan akun di ICS Set Registry, atau mengirimkan aset koleksi untuk dinilai (grading), Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat & Ketentuan yang berlaku di Indonesia Collectibles Standar (ICS).',
-          'Layanan ICS mencakup verifikasi keaslian forensik, penilaian kondisi fisik berdasarkan skala standar 1–10 (Centering, Corners, Edges, Surface), enkapsulasi ultrasonik dengan segel anti-rusak, serta pencatatan sertifikat digital terenkripsi (Dual-NFC & Ledger).',
+          'Layanan ICS mencakup verifikasi keaslian, penilaian kondisi fisik berdasarkan skala standar 1–10 (Centering, Corners, Edges, Surface), enkapsulasi ultrasonik dengan segel anti-rusak, serta pencatatan sertifikat digital (Dual-NFC & Database Publik).',
         ],
       },
       {
@@ -581,7 +581,7 @@ export const ICS_LEGAL_DATA: {
         content: [
           'Setiap slab ICS dilengkapi chip keamanan NXP NTAG 424 terenkripsi dan nomor seri unik (Cert Number) yang terhubung ke basis data publik ICS.',
           'Garansi keaslian sertifikat otomatis batal apabila casing akrilik terbukti pernah dibuka paksa, diretakkan, dimodifikasi, atau dipindahkan isinya ke wadah lain.',
-          'ICS berhak membekukan status sertifikat (is_frozen) pada ledger publik apabila ditemukan laporan kehilangan/pencurian resmi yang terverifikasi atau indikasi duplikasi fisik yang melanggar hukum.',
+          'ICS berhak membekukan status sertifikat (is_frozen) pada database publik apabila ditemukan laporan kehilangan/pencurian resmi yang terverifikasi atau indikasi duplikasi fisik yang melanggar hukum.',
         ],
       },
       {
@@ -686,7 +686,7 @@ export const ICS_LEGAL_DATA: {
         title: 'Hak Akses, Pembaruan & Penghapusan Data',
         content: [
           'Anda memiliki hak penuh untuk mengakses, memperbarui informasi profil (bio, lokasi, foto avatar), maupun mengajukan penghapusan akun kolektor beserta data pribadi yang tersimpan di sistem kami.',
-          'Catatan riwayat populasi anonim (Population Report) dan status validitas nomor sertifikat slab yang pernah diterbitkan akan tetap dipertahankan di ledger untuk menjaga integritas pasar koleksi nasional.',
+          'Catatan riwayat populasi anonim (Population Report) dan status validitas nomor sertifikat slab yang pernah diterbitkan akan tetap dipertahankan di database resmi untuk menjaga integritas pasar koleksi nasional.',
         ],
       },
     ],

@@ -9,7 +9,7 @@ import {
   UserCheck,
   ShieldCheck,
   Layers,
-  Sparkles,
+  Star,
   ArrowLeft,
   ExternalLink,
   Crown,
@@ -461,7 +461,7 @@ function UserVaultContent({ params }: PageProps) {
       setsCompleted: collector?.sets_completed || 0,
       bio:
         collector?.bio ||
-        'Kolektor resmi terdaftar di jaringan ledger sertifikasi ICS Set Registry.',
+        'Kolektor resmi terdaftar di database sertifikasi ICS Set Registry.',
       memberCode: collector ? `ICS-${collector.id.slice(0, 8).toUpperCase()}` : 'UNVERIFIED',
       hasActiveNfc,
     };
@@ -654,7 +654,7 @@ function UserVaultContent({ params }: PageProps) {
                     : 'text-muted-hitam hover:text-foreground-hitam'
                 }`}
               >
-                <Sparkles className="w-4 h-4" /> Vault Showcase Kartu ({userCards.length})
+                <Star className="w-4 h-4" /> Vault Showcase Kartu ({userCards.length})
               </button>
 
               <button
@@ -881,7 +881,7 @@ function UserVaultContent({ params }: PageProps) {
 
                   <div className="flex justify-between items-end relative z-10 border-t border-white/10 pt-4 text-[10px] font-mono text-gray-400">
                     <span>
-                      {userData.hasActiveNfc ? 'ENCRYPTED DUAL-NFC ACTIVE' : 'STANDARD REGISTRY LEDGER'}
+                      {userData.hasActiveNfc ? 'DUAL-NFC ACTIVE' : 'STANDARD REGISTRY MEMBER'}
                     </span>
                     <span className="text-amber-400 font-bold">VERIFIED MEMBER</span>
                   </div>

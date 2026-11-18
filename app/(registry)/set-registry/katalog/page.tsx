@@ -59,33 +59,17 @@ interface MainCategory {
 }
 
 // =========================================================================
-// HELPER GAMBAR & FORMATTER LABEL DATABASE
+// HELPER GAMBAR & FORMATTER LABEL DINAMIS DARI DATABASE
 // =========================================================================
 const FALLBACK_CARD_IMAGE = '/images/home/card1.jpg';
 
-// Mapping label rapi untuk kode sub_types di database (POKEMON, ONE_PIECE, dll.)
-const SUB_TYPE_LABELS: Record<string, string> = {
-  POKEMON: 'Pokémon TCG',
-  ONE_PIECE: 'One Piece Card Game',
-  YUGIOH: 'Yu-Gi-Oh! OCG / TCG',
-  MTG: 'Magic: The Gathering',
-  BANDAI_TCG: 'Bandai Card Games',
-  SPORTS: 'Sports Cards',
-  NARUTO: 'Naruto Kayou & CCG',
-  FUNKO_POP: 'Funko Pop! Vinyl',
-  DIECAST: 'Diecast & Scale Models',
-  ANIME_FIGURE: 'Anime Scale & Prize Figure',
-  MODEL_KIT: 'Model Kit (Gunpla / Plamo)',
-  VINTAGE_FIGURE: 'Vintage Action Figure',
-};
-
+// Helper otomatis merapikan teks sub_types database (misal: "ONE_PIECE" -> "One Piece", "POKEMON" -> "Pokemon")
 function formatSubTypeLabel(raw: string): string {
-  const upper = raw.trim().toUpperCase();
-  if (SUB_TYPE_LABELS[upper]) return SUB_TYPE_LABELS[upper];
-  // Fallback: ubah "NAMA_SUB_TYPE" -> "Nama Sub Type"
-  return upper
+  if (!raw) return '';
+  return raw
+    .trim()
     .split('_')
-    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 }
 
@@ -107,9 +91,7 @@ function resolveValidImageUrl(url: string | null | undefined): string {
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
       return trimmed;
     }
-  } catch {
-    // Fallback jika bukan URL valid
-  }
+  } catch { }
 
   return FALLBACK_CARD_IMAGE;
 }
@@ -162,7 +144,7 @@ export default function CatalogPage() {
             .from('product_categories')
             .select('id, name, slug, status, sub_types')
             .eq('status', 'Active')
-            .order('name', { ascending: false }), // TCG dulu, lalu Action Figure
+            .order('name', { ascending: false }),
           supabase
             .from('card_registry')
             .select('id, set_name, tcg_type, final_grade, front_image_url, is_frozen')
@@ -197,10 +179,9 @@ export default function CatalogPage() {
   }, []);
 
   // =========================================================================
-  // AGREGASI MURNI DARI TABEL product_categories + STATISTIK card_registry
+  // AGREGASI MURNI Dari sub_types DATABASE + STATISTIK card_registry
   // =========================================================================
   const catalogData: MainCategory[] = useMemo(() => {
-    // Hitung statistik card_registry per tcg_type (POKEMON, ONE_PIECE, FUNKO_POP, dll.)
     const statsBySubType = new Map<
       string,
       {
@@ -238,7 +219,6 @@ export default function CatalogPage() {
       }
     });
 
-    // Hanya render kategori yang benar-benar ada di tabel public.product_categories
     return categories.map((cat, idx) => {
       const theme = getCategoryTheme(cat.slug, idx);
       const subTypesList = Array.isArray(cat.sub_types) ? cat.sub_types : [];
@@ -255,17 +235,17 @@ export default function CatalogPage() {
           registeredSlabs >= 50
             ? 'HIGH VOLUME'
             : registeredSlabs >= 10
-            ? 'POPULAR'
-            : registeredSlabs > 0
-            ? 'ACTIVE'
-            : undefined;
+              ? 'POPULAR'
+              : registeredSlabs > 0
+                ? 'ACTIVE'
+                : undefined;
 
         return {
           id: `${cat.slug}-${slugify(upperKey)}`,
           slug: slugify(upperKey),
           code: upperKey,
           rawCode: upperKey,
-          name: formatSubTypeLabel(upperKey),
+          name: formatSubTypeLabel(upperKey), // Diambil otomatis dari string sub_types database
           totalSets,
           registeredSlabs,
           gemMint10,
@@ -286,7 +266,6 @@ export default function CatalogPage() {
     });
   }, [categories, cards]);
 
-  // Filter berdasarkan tab kategori utama & kata kunci pencarian
   const filteredCatalog = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -309,9 +288,7 @@ export default function CatalogPage() {
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 md:pt-52 pb-20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 space-y-12">
 
-        {/* ========================================================================= */}
-        {/* 1. HERO HEADER                                                            */}
-        {/* ========================================================================= */}
+        {/* HERO HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-accent-soft border border-accent-border text-[11px] font-extrabold text-accent uppercase tracking-widest">
             <Grid className="w-3.5 h-3.5 text-accent" />
@@ -327,32 +304,27 @@ export default function CatalogPage() {
           </p>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 2. SEARCH & MAIN CATEGORY FILTER BAR (DINAMIS DARI product_categories)    */}
-        {/* ========================================================================= */}
+        {/* SEARCH & FILTER BAR */}
         <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xs">
-          {/* Search Input */}
           <div className="relative w-full lg:w-80">
             <Search className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Cari sub-kategori (Pokemon, One Piece, Funko)..."
+              placeholder="Cari sub-kategori..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam placeholder-subtle-hitam focus:outline-none focus:border-red-500/60 transition-colors"
             />
           </div>
 
-          {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft overflow-x-auto w-full lg:w-auto">
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                selectedCategory === 'all'
-                  ? 'bg-red-600 text-white shadow-sm'
-                  : 'text-muted-hitam hover:text-foreground-hitam'
-              }`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === 'all'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-muted-hitam hover:text-foreground-hitam'
+                }`}
             >
               Semua Kategori
             </button>
@@ -362,11 +334,10 @@ export default function CatalogPage() {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.slug)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === cat.slug
-                    ? 'bg-red-600 text-white shadow-sm'
-                    : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === cat.slug
+                  ? 'bg-red-600 text-white shadow-sm'
+                  : 'text-muted-hitam hover:text-foreground-hitam'
+                  }`}
               >
                 {cat.title}
               </button>
@@ -374,9 +345,7 @@ export default function CatalogPage() {
           </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 3. CATEGORY SECTIONS + SUB-CATEGORY CARDS GRID                            */}
-        {/* ========================================================================= */}
+        {/* CATEGORY SECTIONS */}
         {loading ? (
           <div className="bg-card-putih border border-line-putih rounded-3xl p-16 flex flex-col items-center justify-center text-muted-hitam gap-3 shadow-xs">
             <Loader2 className="w-7 h-7 animate-spin text-accent" />
@@ -385,26 +354,18 @@ export default function CatalogPage() {
         ) : errorMessage ? (
           <div className="bg-card-putih border border-red-500/40 rounded-3xl p-10 text-center space-y-2">
             <p className="text-sm font-bold text-red-500">{errorMessage}</p>
-            <p className="text-xs text-muted-hitam">
-              Pastikan tabel <code>public.product_categories</code> memiliki RLS policy <code>SELECT</code> untuk publik (<code>anon</code>).
-            </p>
           </div>
         ) : filteredCatalog.length === 0 ? (
           <div className="bg-card-putih border border-line-putih rounded-3xl p-12 text-center space-y-3">
             <Database className="w-8 h-8 text-subtle-hitam mx-auto" />
             <p className="text-sm font-bold text-foreground-hitam">Kategori atau sub-kategori tidak ditemukan</p>
-            <p className="text-xs text-muted-hitam">
-              {categories.length === 0
-                ? 'Data product_categories kosong atau belum diizinkan oleh RLS policy SELECT di Supabase.'
-                : 'Coba kata kunci lain atau ubah filter kategori utama di atas.'}
-            </p>
           </div>
         ) : (
           <div className="space-y-14">
             {filteredCatalog.map((category) => (
               <section key={category.id} className="space-y-6">
-                
-                {/* Category Header Banner (Card Hitam Kontras) */}
+
+                {/* Category Header Banner */}
                 <div className="bg-card-hitam border border-line-hitam rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-md">
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2.5">
@@ -425,73 +386,74 @@ export default function CatalogPage() {
                   </div>
                 </div>
 
-                {/* Sub-Category Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {category.subCategories.map((sub) => (
-                    <Link
-                      key={sub.id}
-                      href={`/set-registry/detail/${sub.slug}`}
-                      className="group bg-card-putih border border-line-putih hover:border-red-500/50 rounded-3xl p-4 flex flex-col justify-between space-y-4 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                    >
-                      {/* Top Visual Card Preview */}
-                      <div className="space-y-3">
-                        <div className="relative aspect-[4/3] w-full rounded-2xl bg-elevated-putih border border-line-putih-soft p-4 flex items-center justify-center overflow-hidden">
-                          <Image
-                            src={sub.image}
-                            alt={sub.name}
-                            width={140}
-                            height={180}
-                            className="object-contain max-h-full group-hover:scale-108 transition-transform duration-300 drop-shadow-md"
-                          />
-
-                          {/* Sub-Category Code Pill */}
-                          <span className="absolute top-3 left-3 text-[10px] font-mono font-black bg-card-hitam text-foreground-putih border border-line-hitam px-2.5 py-1 rounded-lg shadow">
-                            {sub.code}
-                          </span>
-
-                          {/* Highlight Badge */}
-                          {sub.badge && (
-                            <span className={`absolute top-3 right-3 text-[9px] font-extrabold px-2 py-0.5 rounded-md border ${category.badgeBg}`}>
-                              {sub.badge}
+                {/* SINGLE ROW HORIZONTAL SCROLLING CONTAINER (1 Baris Saja) */}
+                <div className="relative pt-2">
+                  <div className="flex items-center gap-6 overflow-x-auto pb-4 pt-1 px-1 scrollbar-thin scrollbar-thumb-red-600/35">
+                    {category.subCategories.map((sub) => (
+                      <Link
+                        key={sub.id}
+                        href={`/set-registry/detail/${sub.slug}`}
+                        className="group shrink-0 w-[270px] sm:w-[290px] bg-card-putih border border-line-putih hover:border-red-500/50 rounded-3xl p-4 flex flex-col justify-between space-y-4 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                      >
+                        <div className="space-y-3">
+                          <div className="relative aspect-[4/3] w-full rounded-2xl bg-elevated-putih border border-line-putih-soft p-4 flex items-center justify-center overflow-hidden">
+                            <Image
+                              src={sub.image}
+                              alt={sub.name}
+                              width={140}
+                              height={180}
+                              className="object-contain max-h-full group-hover:scale-108 transition-transform duration-300 drop-shadow-md"
+                            />
+                            <span className="absolute top-3 left-3 text-[10px] font-mono font-black bg-card-hitam text-foreground-putih border border-line-hitam px-2.5 py-1 rounded-lg shadow">
+                              {sub.code}
                             </span>
-                          )}
-                        </div>
-
-                        {/* Sub-Category Name & Set Count */}
-                        <div className="space-y-1 px-1">
-                          <div className="flex items-center justify-between text-[11px] font-mono text-subtle-hitam">
-                            <span>{category.title}</span>
-                            <span>{sub.totalSets} Seri / Set</span>
+                            {sub.badge && (
+                              <span className={`absolute top-3 right-3 text-[9px] font-extrabold px-2 py-0.5 rounded-md border ${category.badgeBg}`}>
+                                {sub.badge}
+                              </span>
+                            )}
                           </div>
-                          <h3 className="text-base font-extrabold text-foreground-hitam group-hover:text-accent transition-colors line-clamp-2 leading-snug">
-                            {sub.name}
-                          </h3>
-                        </div>
-                      </div>
 
-                      {/* Bottom Stats & CTA */}
-                      <div className="space-y-3 pt-2 border-t border-line-putih-soft px-1">
-                        <div className="flex items-center justify-between text-[11px] font-mono">
-                          <span className="text-muted-hitam flex items-center gap-1">
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <strong className="text-foreground-hitam">
-                              {sub.registeredSlabs.toLocaleString('id-ID')}
-                            </strong>{' '}
-                            Slabs
-                          </span>
-                          <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-bold">
-                            <Trophy className="w-3.5 h-3.5" />
-                            {sub.gemMint10.toLocaleString('id-ID')} Gem 10
-                          </span>
+                          <div className="space-y-1 px-1">
+                            <div className="flex items-center justify-between text-[11px] font-mono text-subtle-hitam">
+                              <span>{category.title}</span>
+                              <span>{sub.totalSets} Seri / Set</span>
+                            </div>
+                            <h3 className="text-base font-extrabold text-foreground-hitam group-hover:text-accent transition-colors line-clamp-2 leading-snug">
+                              {sub.name}
+                            </h3>
+                          </div>
                         </div>
 
-                        <div className="w-full py-2 px-3 rounded-xl bg-elevated-putih group-hover:bg-red-600 text-foreground-hitam group-hover:text-white text-xs font-bold flex items-center justify-between transition-colors">
-                          <span>Jelajahi Sub-Kategori</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        <div className="space-y-3 pt-2 border-t border-line-putih-soft px-1">
+                          <div className="flex items-center justify-between text-[11px] font-mono">
+                            <span className="text-muted-hitam flex items-center gap-1">
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <strong className="text-foreground-hitam">
+                                {sub.registeredSlabs.toLocaleString('id-ID')}
+                              </strong>{' '}
+                              Slabs
+                            </span>
+                            <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-bold">
+                              <Trophy className="w-3.5 h-3.5" />
+                              {sub.gemMint10.toLocaleString('id-ID')} Gem 10
+                            </span>
+                          </div>
+
+                          <div className="w-full py-2 px-3 rounded-xl bg-elevated-putih group-hover:bg-red-600 text-foreground-hitam group-hover:text-white text-xs font-bold flex items-center justify-between transition-colors">
+                            <span>Jelajahi Sub-Kategori</span>
+                            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
+                  </div>
+
+                  {category.subCategories.length > 4 && (
+                    <p className="text-[11px] text-muted-hitam text-right italic pt-1">
+                      {category.subCategories.length} Total
+                    </p>
+                  )}
                 </div>
 
               </section>

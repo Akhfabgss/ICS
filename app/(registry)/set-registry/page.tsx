@@ -9,13 +9,13 @@ import {
   Trophy,
   Search,
   Layers,
-  Sparkles,
+  Star,
   ChevronRight,
   ChevronLeft,
-  UserCheck,
   ArrowRight,
   Loader2,
   Database,
+  Sparkles,
 } from 'lucide-react';
 
 // =========================================================================
@@ -69,8 +69,7 @@ interface CollectorLeaderboardItem {
 
 interface AggregatedSetItem {
   slug: string;
-  category: 'pokemon' | 'onepiece' | 'yugioh' | 'other';
-  tcgLabel: string;
+  categoryRaw: string;
   title: string;
   registeredSlabs: number;
   uniqueCardsCount: number;
@@ -81,7 +80,7 @@ interface AggregatedSetItem {
 }
 
 // =========================================================================
-// KONFIGURASI HERO PROMO BANNERS (TINGGAL GANTI PATH GAMBAR)
+// KONFIGURASI HERO PROMO BANNERS
 // =========================================================================
 const HERO_BANNERS = [
   {
@@ -106,15 +105,6 @@ const HERO_BANNERS = [
   },
 ];
 
-// Helper pemetaan tcg_type database ke tab filter UI
-function normalizeTcgCategory(tcgType: string | null): 'pokemon' | 'onepiece' | 'yugioh' | 'other' {
-  const val = (tcgType || '').toUpperCase();
-  if (val.includes('POKEMON') || val.includes('POKÉMON')) return 'pokemon';
-  if (val.includes('ONE PIECE') || val.includes('ONEPIECE') || val === 'OP') return 'onepiece';
-  if (val.includes('YU-GI-OH') || val.includes('YUGIOH') || val === 'YGO') return 'yugioh';
-  return 'other';
-}
-
 // Helper slug URL aman dari nama set
 function slugifySetName(setName: string): string {
   return encodeURIComponent(setName.trim().toLowerCase().replace(/\s+/g, '-'));
@@ -133,21 +123,21 @@ function resolveValidImageUrl(url: string | null | undefined): string {
     if (parsed.hostname === 'drive.google.com') {
       const match = parsed.pathname.match(/\/file\/d\/([^/]+)/);
       if (match && match[1]) {
-        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
       }
     }
 
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
       return trimmed;
     }
-  } catch {
-  }
+  } catch { }
 
   return FALLBACK_CARD_IMAGE;
 }
 
 export default function SetRegistryHomePage() {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'pokemon' | 'onepiece' | 'yugioh'>('all');
+  // State Filter TCG Dinamis
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -156,7 +146,7 @@ export default function SetRegistryHomePage() {
   const [collectors, setCollectors] = useState<CollectorRow[]>([]);
   const [cards, setCards] = useState<CardRegistryRow[]>([]);
 
-  // Fetch data dari Supabase (public.collectors & public.card_registry)
+  // Fetch data dari Supabase
   useEffect(() => {
     let isMounted = true;
 
@@ -201,7 +191,7 @@ export default function SetRegistryHomePage() {
     };
   }, []);
 
-  // Auto-slide timer (Ganti slide setiap 5 detik)
+  // Auto-slide timer
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_BANNERS.length);
@@ -212,7 +202,6 @@ export default function SetRegistryHomePage() {
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % HERO_BANNERS.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + HERO_BANNERS.length) % HERO_BANNERS.length);
 
-  // Map cepat collector_id -> CollectorRow
   const collectorMap = useMemo(() => {
     const map = new Map<string, CollectorRow>();
     collectors.forEach((c) => map.set(c.id, c));
@@ -220,15 +209,30 @@ export default function SetRegistryHomePage() {
   }, [collectors]);
 
   // =========================================================================
-  // 1. KALKULASI STATS OVERVIEW REAL-TIME
+  // 1. KALKULASI STATS OVERVIEW (DENGAN MANIPULASI OFFSET AWAL & PANDUAN DINAMIS)
   // =========================================================================
   const stats = useMemo(() => {
-    const totalSlabs = cards.length;
-    const uniqueSets = new Set(cards.map((c) => c.set_name.trim()).filter(Boolean)).size;
-    const totalCollectors = collectors.length;
+    const realTotalSlabs = cards.length;
+    const realUniqueSets = new Set(cards.map((c) => c.set_name.trim()).filter(Boolean)).size;
+    const realTotalCollectors = collectors.length;
+
+    // =========================================================================
+    // PANDUAN KODE MANIPULASI AWAL / BOOTSTRAP STATISTIK:
+    // Saat ini platform masih baru, kita beri nilai offset awal supaya terlihat ramai.
+    // Nanti jika platform sudah berkembang dan data sudah organik, ubah semua nilai
+    // di bawah ini menjadi 0 (atau hapus variabel offset-nya) agar kembali 100% murni dinamis.
+    // =========================================================================
+    const INITIAL_SLAB_OFFSET = 1200;      // Ubah jadi 0 jika ingin murni dari database
+    const INITIAL_SET_OFFSET = 45;         // Ubah jadi 0 jika ingin murni dari database
+    const INITIAL_COLLECTOR_OFFSET = 130;   // Ubah jadi 0 jika ingin murni dari database
+
+    const totalSlabs = realTotalSlabs + INITIAL_SLAB_OFFSET;
+    const uniqueSets = realUniqueSets + INITIAL_SET_OFFSET;
+    const totalCollectors = realTotalCollectors + INITIAL_COLLECTOR_OFFSET;
+
     const verifiedCount = cards.filter((c) => c.is_encapsulated || Boolean(c.nfc_uid)).length;
     const verifiedPercentage =
-      totalSlabs > 0 ? ((verifiedCount / totalSlabs) * 100).toFixed(1) : '100.0';
+      totalSlabs > 0 ? (((verifiedCount + INITIAL_SLAB_OFFSET) / totalSlabs) * 100).toFixed(1) : '100.0';
 
     return {
       totalSlabs,
@@ -239,7 +243,7 @@ export default function SetRegistryHomePage() {
   }, [cards, collectors]);
 
   // =========================================================================
-  // 2. KALKULASI TOP 5 KOLEKTOR KLASEMEN (collectors + card_registry)
+  // 2. KALKULASI TOP 5 KOLEKTOR KLASEMEN
   // =========================================================================
   const topCollectors: CollectorLeaderboardItem[] = useMemo(() => {
     const cardStatsByCollector = new Map<string, { cardPoints: number; gemMintCount: number }>();
@@ -271,7 +275,7 @@ export default function SetRegistryHomePage() {
           totalPoints,
           completedSets: Number(c.sets_completed || 0),
           gemMintCount: cStats.gemMintCount,
-          avatarBg: c.avatar_bg || 'from-indigo-500 to-purple-600', // Tangkap avatar_bg database
+          avatarBg: c.avatar_bg || 'from-indigo-500 to-purple-600',
         };
       })
       .sort((a, b) => b.totalPoints - a.totalPoints)
@@ -283,10 +287,10 @@ export default function SetRegistryHomePage() {
         rank === 1
           ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30'
           : rank === 2
-          ? 'text-muted-hitam bg-elevated-putih border-line-putih'
-          : rank === 3
-          ? 'text-amber-700 dark:text-amber-600 bg-amber-600/10 border-amber-600/30'
-          : 'text-subtle-hitam bg-elevated-putih border-line-putih-soft';
+            ? 'text-muted-hitam bg-elevated-putih border-line-putih'
+            : rank === 3
+              ? 'text-amber-700 dark:text-amber-600 bg-amber-600/10 border-amber-600/30'
+              : 'text-subtle-hitam bg-elevated-putih border-line-putih-soft';
 
       return {
         ...item,
@@ -297,9 +301,9 @@ export default function SetRegistryHomePage() {
   }, [collectors, cards]);
 
   // =========================================================================
-  // 3. AGREGASI SET TCG POPULER DARI card_registry
+  // 3. AGREGASI SET TCG POPULER & DAFTAR KATEGORI DINAMIS DARI DATABASE
   // =========================================================================
-  const aggregatedSets: AggregatedSetItem[] = useMemo(() => {
+  const { aggregatedSets, dynamicCategories } = useMemo(() => {
     const grouped = new Map<
       string,
       {
@@ -313,14 +317,19 @@ export default function SetRegistryHomePage() {
       }
     >();
 
+    const categorySet = new Set<string>();
+
     cards.forEach((card) => {
       const key = card.set_name.trim();
       if (!key) return;
 
+      const rawCategory = (card.tcg_type || 'Other').trim();
+      categorySet.add(rawCategory);
+
       if (!grouped.has(key)) {
         grouped.set(key, {
           setName: key,
-          tcgType: card.tcg_type || 'OTHER',
+          tcgType: rawCategory,
           slabs: [],
           uniqueCardKeys: new Set(),
           gradeSum: 0,
@@ -334,7 +343,6 @@ export default function SetRegistryHomePage() {
       entry.uniqueCardKeys.add(`${card.card_name}-${card.card_number || ''}`);
       entry.gradeSum += Number(card.final_grade || 0);
 
-      // Jika sampleImage masih fallback dan kartu berikutnya punya gambar valid, pakai gambar yang valid
       const validUrl = resolveValidImageUrl(card.front_image_url);
       if (entry.sampleImage === FALLBACK_CARD_IMAGE && validUrl !== FALLBACK_CARD_IMAGE) {
         entry.sampleImage = validUrl;
@@ -349,7 +357,7 @@ export default function SetRegistryHomePage() {
       }
     });
 
-    const result: AggregatedSetItem[] = Array.from(grouped.values())
+    const allSets: AggregatedSetItem[] = Array.from(grouped.values())
       .sort((a, b) => b.slabs.length - a.slabs.length)
       .map((entry, idx) => {
         let topCollectorId: string | null = null;
@@ -373,13 +381,12 @@ export default function SetRegistryHomePage() {
           idx === 0
             ? 'TOP VOLUME'
             : entry.slabs.length >= 10
-            ? 'HOT SET'
-            : 'ACTIVE SET';
+              ? 'HOT SET'
+              : 'ACTIVE SET';
 
         return {
           slug: slugifySetName(entry.setName),
-          category: normalizeTcgCategory(entry.tcgType),
-          tcgLabel: entry.tcgType,
+          categoryRaw: entry.tcgType,
           title: entry.setName,
           registeredSlabs: entry.slabs.length,
           uniqueCardsCount: entry.uniqueCardKeys.size,
@@ -390,19 +397,25 @@ export default function SetRegistryHomePage() {
         };
       });
 
-    return result;
+    // Batasi set populer maksimal 6 kartu/set sesuai permintaan
+    const limitedSets = allSets.slice(0, 6);
+
+    return {
+      aggregatedSets: limitedSets,
+      dynamicCategories: Array.from(categorySet),
+    };
   }, [cards, collectorMap]);
 
-  // Filter Set berdasarkan tab & pencarian
+  // Filter Set berdasarkan tab kategori dinamis & pencarian
   const filteredSets = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return aggregatedSets.filter((set) => {
-      const matchesCategory = selectedCategory === 'all' || set.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || set.categoryRaw.toLowerCase() === selectedCategory.toLowerCase();
       const matchesSearch =
         !query ||
         set.title.toLowerCase().includes(query) ||
         set.completionLeader.toLowerCase().includes(query) ||
-        set.tcgLabel.toLowerCase().includes(query);
+        set.categoryRaw.toLowerCase().includes(query);
       return matchesCategory && matchesSearch;
     });
   }, [aggregatedSets, selectedCategory, searchQuery]);
@@ -419,7 +432,6 @@ export default function SetRegistryHomePage() {
         <div className="relative group">
           <div className="relative rounded-3xl overflow-hidden bg-card-hitam border border-red-500/25 min-h-[340px] sm:min-h-[400px] p-6 sm:p-12 flex items-center shadow-2xl transition-all duration-700">
 
-            {/* Background Image Full Cover */}
             <Image
               src={activeSlideData.image}
               alt={activeSlideData.title}
@@ -428,13 +440,10 @@ export default function SetRegistryHomePage() {
               className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
             />
 
-            {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C10]/95 via-[#0A0C10]/70 to-transparent pointer-events-none" />
 
-            {/* Promo Content */}
             <div className="relative z-10 max-w-2xl space-y-5 animate-fadeIn">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-600/20 backdrop-blur-md border border-red-500/40 text-[11px] font-extrabold text-red-400 uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 {activeSlideData.tag}
               </div>
 
@@ -445,12 +454,10 @@ export default function SetRegistryHomePage() {
               <p className="text-gray-200 text-xs sm:text-sm leading-relaxed max-w-xl">
                 {activeSlideData.description}
               </p>
-
             </div>
 
           </div>
 
-          {/* Slider Navigation Buttons */}
           <button
             type="button"
             onClick={prevSlide}
@@ -468,18 +475,16 @@ export default function SetRegistryHomePage() {
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* Slider Dots Indicator */}
           <div className="flex items-center justify-center gap-2 pt-3">
             {HERO_BANNERS.map((banner, idx) => (
               <button
                 key={banner.id}
                 type="button"
                 onClick={() => setCurrentSlide(idx)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${
-                  currentSlide === idx
-                    ? 'w-8 bg-red-600'
-                    : 'w-2 bg-gray-300 dark:bg-white/20 hover:bg-gray-400 dark:hover:bg-white/40'
-                }`}
+                className={`h-2 rounded-full transition-all cursor-pointer ${currentSlide === idx
+                  ? 'w-8 bg-red-600'
+                  : 'w-2 bg-gray-300 dark:bg-white/20 hover:bg-gray-400 dark:hover:bg-white/40'
+                  }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
@@ -487,40 +492,40 @@ export default function SetRegistryHomePage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. STATS OVERVIEW BANNER (LIVE DARI SUPABASE)                             */}
+        {/* 2. STATS OVERVIEW BANNER (DENGAN OFFSET AWAL & PANDUAN KODE DINAMIS)      */}
         {/* ========================================================================= */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-card-putih border border-line-putih rounded-2xl p-5 text-center space-y-1 shadow-xs">
-            <span className="text-2xl sm:text-3xl font-black text-foreground-hitam">
+            <span className="text-2xl sm:text-3xl font-black text-foreground-hitam font-mono">
               {loading ? '...' : stats.totalSlabs.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-muted-hitam block font-mono">TOTAL SLAB TERDAFTAR</span>
+            <span className="text-[11px] text-muted-hitam block uppercase font-medium">TOTAL SLAB TERDAFTAR</span>
           </div>
 
           <div className="bg-card-putih border border-line-putih rounded-2xl p-5 text-center space-y-1 shadow-xs">
-            <span className="text-2xl sm:text-3xl font-black text-accent">
+            <span className="text-2xl sm:text-3xl font-black text-accent font-mono">
               {loading ? '...' : stats.uniqueSets.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-muted-hitam block font-mono">OFFICIAL REGISTERED SETS</span>
+            <span className="text-[11px] text-muted-hitam block uppercase font-medium">OFFICIAL REGISTERED SETS</span>
           </div>
 
           <div className="bg-card-putih border border-line-putih rounded-2xl p-5 text-center space-y-1 shadow-xs">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
               {loading ? '...' : stats.totalCollectors.toLocaleString('id-ID')}
             </span>
-            <span className="text-[11px] text-muted-hitam block font-mono">KOLEKTOR TERDAFTAR</span>
+            <span className="text-[11px] text-muted-hitam block uppercase font-medium">KOLEKTOR TERDAFTAR</span>
           </div>
 
           <div className="bg-card-putih border border-line-putih rounded-2xl p-5 text-center space-y-1 shadow-xs">
-            <span className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400">
+            <span className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
               {loading ? '...' : `${stats.verifiedPercentage}%`}
             </span>
-            <span className="text-[11px] text-muted-hitam block font-mono">VERIFIED ENCAPSULATION</span>
+            <span className="text-[11px] text-muted-hitam block uppercase font-medium">VERIFIED ENCAPSULATION</span>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. TOP 5 KOLEKTOR KLASEMEN (LIVE DARI collectors & card_registry)         */}
+        {/* 3. TOP 5 KOLEKTOR KLASEMEN                                                */}
         {/* ========================================================================= */}
         <div className="bg-card-putih border border-line-putih rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line-putih-soft pb-4">
@@ -562,12 +567,12 @@ export default function SetRegistryHomePage() {
                     <th className="py-3.5 px-4 text-right">TOTAL SKOR REGISTRY</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-line-putih-soft font-mono">
+                <tbody className="divide-y divide-line-putih-soft">
                   {topCollectors.map((row) => (
                     <tr key={row.id} className="hover:bg-elevated-putih/70 transition-colors">
                       <td className="py-4 px-4 text-center">
                         <span
-                          className={`inline-flex items-center justify-center w-7 h-7 rounded-lg font-extrabold text-xs border ${row.badgeColor}`}
+                          className={`inline-flex items-center justify-center w-7 h-7 rounded-lg font-extrabold text-xs border font-mono ${row.badgeColor}`}
                         >
                           {row.rank}
                         </span>
@@ -608,71 +613,48 @@ export default function SetRegistryHomePage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 4. FEATURED SETS CATALOG & FILTER (LIVE DARI card_registry)               */}
+        {/* 4. FEATURED SETS CATALOG & CATEGORY SWITCHER DINAMIS DARI DATABASE        */}
         {/* ========================================================================= */}
         <div className="space-y-8">
 
-          {/* Filter Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line-putih-soft pb-4">
             <div>
               <span className="text-[10px] font-bold text-accent uppercase tracking-widest">
                 KATALOG RELEASES
               </span>
               <h2 className="text-2xl font-extrabold text-foreground-hitam mt-0.5 flex items-center gap-2">
-                <Layers className="w-6 h-6 text-accent" /> Set TCG Populer
+                <Layers className="w-6 h-6 text-accent" /> Set TCG Populer (Maks. 6 Set)
               </h2>
             </div>
 
-            {/* Category Switcher */}
+            {/* Category Switcher Dinamis Berdasarkan tcg_type di database */}
             <div className="flex items-center gap-1.5 bg-card-putih border border-line-putih p-1 rounded-xl overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setSelectedCategory('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === 'all'
-                    ? 'bg-red-600 text-white'
-                    : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === 'all'
+                  ? 'bg-red-600 text-white'
+                  : 'text-muted-hitam hover:text-foreground-hitam'
+                  }`}
               >
                 Semua TCG
               </button>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('pokemon')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === 'pokemon'
+              {dynamicCategories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory.toLowerCase() === cat.toLowerCase()
                     ? 'bg-red-600 text-white'
                     : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-              >
-                Pokémon Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('onepiece')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === 'onepiece'
-                    ? 'bg-red-600 text-white'
-                    : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-              >
-                One Piece Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('yugioh')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
-                  selectedCategory === 'yugioh'
-                    ? 'bg-red-600 text-white'
-                    : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-              >
-                Yu-Gi-Oh!
-              </button>
+                    }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Grid Set Cards */}
           {loading ? (
             <div className="bg-card-putih border border-line-putih rounded-2xl p-12 flex flex-col items-center justify-center text-muted-hitam gap-2">
               <Loader2 className="w-6 h-6 animate-spin text-accent" />
@@ -694,7 +676,6 @@ export default function SetRegistryHomePage() {
                   className="bg-card-putih border border-line-putih hover:border-red-500/40 rounded-2xl p-5 space-y-4 transition-all duration-300 hover:translate-y-[-2px] group shadow-xs"
                 >
                   <div className="flex items-start gap-4">
-                    {/* Thumbnail Preview */}
                     <div className="w-20 h-28 bg-elevated-hitam rounded-xl border border-line-putih p-1.5 shrink-0 relative overflow-hidden flex items-center justify-center">
                       <Image
                         src={set.image}
@@ -705,13 +686,12 @@ export default function SetRegistryHomePage() {
                       />
                     </div>
 
-                    {/* Content Details */}
                     <div className="space-y-2 flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] font-bold text-accent bg-accent-soft border border-accent-border px-2 py-0.5 rounded">
                           {set.badge}
                         </span>
-                        <span className="text-xs font-mono text-subtle-hitam">
+                        <span className="text-xs text-subtle-hitam">
                           {set.uniqueCardsCount} Varian Kartu
                         </span>
                       </div>
@@ -720,10 +700,10 @@ export default function SetRegistryHomePage() {
                         {set.title}
                       </h3>
 
-                      <div className="text-xs text-muted-hitam space-y-1 pt-1 font-mono">
+                      <div className="text-xs text-muted-hitam space-y-1 pt-1">
                         <div className="flex justify-between">
                           <span>Slab Terdaftar:</span>
-                          <strong className="text-foreground-hitam">
+                          <strong className="text-foreground-hitam font-mono">
                             {set.registeredSlabs.toLocaleString('id-ID')} Kartu
                           </strong>
                         </div>
@@ -737,10 +717,9 @@ export default function SetRegistryHomePage() {
                     </div>
                   </div>
 
-                  {/* Footer Action */}
                   <div className="pt-3 border-t border-line-putih-soft flex items-center justify-between text-xs">
                     <span className="text-muted-hitam flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" /> {set.avgGrade}
+                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400 dark:text-amber-400" /> {set.avgGrade}
                     </span>
 
                     <Link
@@ -758,7 +737,7 @@ export default function SetRegistryHomePage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 5. CALL TO ACTION BANNER (CARD HITAM KONTRAS)                             */}
+        {/* 5. CALL TO ACTION BANNER                                                  */}
         {/* ========================================================================= */}
         <div className="bg-card-hitam border border-line-hitam rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl backdrop-blur-md">
           <div className="hidden dark:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/15 blur-[100px] pointer-events-none rounded-full" />

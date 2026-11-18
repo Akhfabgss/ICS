@@ -6,96 +6,72 @@ import { supabase } from '@/lib/supabase';
 import CollectorAvatar from '@/components/CollectorAvatar';
 import {
   Trophy,
-  Crown,
   Search,
-  UserCheck,
   ArrowLeft,
-  ExternalLink,
-  HelpCircle,
   Loader2,
   Database,
+  Award,
+  ChevronDown,
+  HelpCircle,
 } from 'lucide-react';
 
 // =========================================================================
-// TIPE DATA SESUAI SCHEMA SUPABASE (collectors & card_registry)
+// TIPE DATA SESUAI SCHEMA SUPABASE
 // =========================================================================
 interface CollectorRow {
   id: string;
+  user_id: string | null;
   username: string;
   display_name: string;
-  location: string | null;
   avatar_bg: string;
   manual_points: number;
   sets_completed: number;
   badge: string;
-  join_date: string;
 }
 
 interface CardRegistryRow {
   id: string;
-  tcg_type: string | null;
   final_grade: number;
-  is_frozen: boolean | null;
-  created_at: string | null;
   collector_id: string | null;
   points: number;
+  tcg_type: string | null;
 }
 
-interface RankedCollector {
+interface ProductCategoryRow {
   id: string;
+  name: string;
+  slug: string;
+  sub_types: string[];
+}
+
+interface LeaderboardItem {
+  id: string;
+  user_id: string | null;
   rank: number;
   username: string;
   rawUsername: string;
-  name: string;
-  primaryCategory: 'pokemon' | 'onepiece' | 'yugioh' | 'other';
-  primaryCategoryLabel: string;
-  completedSets: number;
-  gem10Count: number;
+  displayName: string;
   totalPoints: number;
-  pointsFormatted: string;
-  badge: string;
+  completedSets: number;
+  gemMintCount: number;
+  badgeColor: string;
   avatarBg: string;
 }
 
-type CategoryFilter = 'all' | 'pokemon' | 'onepiece' | 'yugioh';
-type TimeframeFilter = 'alltime' | 'season2026' | 'monthly';
-
-function normalizeCategory(tcgType: string | null): 'pokemon' | 'onepiece' | 'yugioh' | 'other' {
-  const val = (tcgType || '').toUpperCase();
-  if (val.includes('POKEMON') || val.includes('POKÉMON')) return 'pokemon';
-  if (val.includes('ONE_PIECE') || val.includes('ONE PIECE') || val === 'OP') return 'onepiece';
-  if (val.includes('YUGIOH') || val.includes('YU-GI-OH') || val === 'YGO') return 'yugioh';
-  return 'other';
-}
-
-function formatCategoryBadge(cat: 'pokemon' | 'onepiece' | 'yugioh' | 'other'): string {
-  switch (cat) {
-    case 'pokemon':
-      return 'Pokémon';
-    case 'onepiece':
-      return 'One Piece';
-    case 'yugioh':
-      return 'Yu-Gi-Oh!';
-    default:
-      return 'Multi-TCG';
-  }
-}
-
-export default function LeaderboardPage() {
+export default function KlasemenPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [tcgCategory, setTcgCategory] = useState<CategoryFilter>('all');
-  const [timeframe, setTimeframe] = useState<TimeframeFilter>('alltime');
+
+  // State Filter Kategori Utama (Dropdown) & Sub-Kategori
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string>('all');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>('all');
 
   // State Data Database
   const [loading, setLoading] = useState(true);
   const [collectors, setCollectors] = useState<CollectorRow[]>([]);
   const [cards, setCards] = useState<CardRegistryRow[]>([]);
+  const [productCategories, setProductCategories] = useState<ProductCategoryRow[]>([]);
 
-  const [nowTimestamp, setNowTimestamp] = useState<number | null>(null);
-
-  useEffect(() => {
-    setNowTimestamp(Date.now());
-  }, []);
+  const [currentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -103,33 +79,32 @@ export default function LeaderboardPage() {
     async function fetchLeaderboardData() {
       setLoading(true);
       try {
-        const [collectorsRes, cardsRes] = await Promise.all([
+        const [colRes, cardsRes, catRes] = await Promise.all([
           supabase
             .from('collectors')
-            .select(
-              'id, username, display_name, location, avatar_bg, manual_points, sets_completed, badge, join_date'
-            ),
+            .select('id, user_id, username, display_name, manual_points, sets_completed, badge, avatar_bg'),
           supabase
             .from('card_registry')
-            .select('id, tcg_type, final_grade, is_frozen, created_at, collector_id, points')
+            .select('id, final_grade, collector_id, points, tcg_type')
             .eq('is_frozen', false),
+          supabase
+            .from('product_categories')
+            .select('id, name, slug, sub_types')
+            .eq('status', 'Active'),
         ]);
 
         if (!isMounted) return;
 
-        if (collectorsRes.error) {
-          console.error('Error fetching collectors:', collectorsRes.error.message);
-        } else {
-          setCollectors((collectorsRes.data as CollectorRow[]) || []);
-        }
+        if (colRes.error) console.error('Error collectors:', colRes.error.message);
+        else setCollectors((colRes.data as CollectorRow[]) || []);
 
-        if (cardsRes.error) {
-          console.error('Error fetching card_registry:', cardsRes.error.message);
-        } else {
-          setCards((cardsRes.data as CardRegistryRow[]) || []);
-        }
+        if (cardsRes.error) console.error('Error cards:', cardsRes.error.message);
+        else setCards((cardsRes.data as CardRegistryRow[]) || []);
+
+        if (catRes.error) console.error('Error categories:', catRes.error.message);
+        else setProductCategories((catRes.data as ProductCategoryRow[]) || []);
       } catch (err) {
-        console.error('Unexpected error loading Leaderboard:', err);
+        console.error('Unexpected error loading leaderboard:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -142,193 +117,126 @@ export default function LeaderboardPage() {
   }, []);
 
   // =========================================================================
-  // KALKULASI KLASEMEN REAL-TIME (collectors + card_registry)
+  // 1. AMBIL SUB-KATEGORI BERDASARKAN DROPDOWN KATEGORI UTAMA YANG DIPILIH
   // =========================================================================
-  const rankedCollectors: RankedCollector[] = useMemo(() => {
-    const currentYear = nowTimestamp ? new Date(nowTimestamp).getFullYear() : 2026;
-    const thirtyDaysAgo = nowTimestamp
-      ? new Date(nowTimestamp - 30 * 24 * 60 * 60 * 1000)
-      : null;
-
-    // Filter kartu berdasarkan Timeframe & Kategori jika dipilih
-    const eligibleCards = cards.filter((card) => {
-      if (!card.collector_id) return false;
-
-      if (timeframe !== 'alltime' && card.created_at) {
-        const created = new Date(card.created_at);
-        if (timeframe === 'season2026' && created.getFullYear() !== currentYear) {
-          return false;
+  const availableSubCategories = useMemo(() => {
+    if (selectedMainCategory === 'all') {
+      const allSubs = new Set<string>();
+      productCategories.forEach((cat) => {
+        if (Array.isArray(cat.sub_types)) {
+          cat.sub_types.forEach((sub) => allSubs.add(sub.trim().toUpperCase()));
         }
-        if (timeframe === 'monthly' && thirtyDaysAgo && created < thirtyDaysAgo) {
-          return false;
-        }
-      }
+      });
+      return Array.from(allSubs);
+    }
 
-      if (tcgCategory !== 'all') {
-        const normalized = normalizeCategory(card.tcg_type);
-        if (normalized !== tcgCategory) return false;
-      }
+    const foundCat = productCategories.find((cat) => cat.slug === selectedMainCategory);
+    if (!foundCat || !Array.isArray(foundCat.sub_types)) return [];
+    return foundCat.sub_types.map((sub) => sub.trim().toUpperCase());
+  }, [selectedMainCategory, productCategories]);
 
-      return true;
-    });
+  const handleMainCategoryChange = (slug: string) => {
+    setSelectedMainCategory(slug);
+    setSelectedSubCategory('all');
+  };
 
-    // Hitung agregasi kartu per collector_id
-    const statsByCollector = new Map<
-      string,
-      {
-        cardPoints: number;
-        gem10Count: number;
-        categoryCount: Record<'pokemon' | 'onepiece' | 'yugioh' | 'other', number>;
-      }
-    >();
+  function formatLabel(raw: string): string {
+    return raw
+      .trim()
+      .split('_')
+      .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+      .join(' ');
+  }
 
-    // Hitung kategori dominan dari seluruh kartu milik kolektor (terlepas dari timeframe)
-    const allTimeCatCountByCollector = new Map<
-      string,
-      Record<'pokemon' | 'onepiece' | 'yugioh' | 'other', number>
-    >();
+  // =========================================================================
+  // 2. KALKULASI KLASEMEN BERDASARKAN FILTER SUB-KATEGORI AKTIF
+  // =========================================================================
+  const fullLeaderboard: LeaderboardItem[] = useMemo(() => {
+    const cardStatsByCollector = new Map<string, { cardPoints: number; gemMintCount: number }>();
 
     cards.forEach((card) => {
       if (!card.collector_id) return;
-      const cat = normalizeCategory(card.tcg_type);
-      const mapEntry = allTimeCatCountByCollector.get(card.collector_id) || {
-        pokemon: 0,
-        onepiece: 0,
-        yugioh: 0,
-        other: 0,
-      };
-      mapEntry[cat] += 1;
-      allTimeCatCountByCollector.set(card.collector_id, mapEntry);
-    });
 
-    eligibleCards.forEach((card) => {
-      const colId = card.collector_id!;
-      const entry = statsByCollector.get(colId) || {
-        cardPoints: 0,
-        gem10Count: 0,
-        categoryCount: { pokemon: 0, onepiece: 0, yugioh: 0, other: 0 },
-      };
-
-      entry.cardPoints += Number(card.points || 0);
-      if (Number(card.final_grade) >= 10) {
-        entry.gem10Count += 1;
+      if (selectedSubCategory !== 'all') {
+        const cardTcg = (card.tcg_type || '').trim().toUpperCase();
+        if (cardTcg !== selectedSubCategory.toUpperCase()) return;
       }
-      const cat = normalizeCategory(card.tcg_type);
-      entry.categoryCount[cat] += 1;
 
-      statsByCollector.set(colId, entry);
+      const current = cardStatsByCollector.get(card.collector_id) || {
+        cardPoints: 0,
+        gemMintCount: 0,
+      };
+      current.cardPoints += Number(card.points || 0);
+      if (Number(card.final_grade) >= 10) {
+        current.gemMintCount += 1;
+      }
+      cardStatsByCollector.set(card.collector_id, current);
     });
 
-    const computed = collectors
-      .map((col) => {
-        const cStats = statsByCollector.get(col.id) || {
-          cardPoints: 0,
-          gem10Count: 0,
-          categoryCount: { pokemon: 0, onepiece: 0, yugioh: 0, other: 0 },
-        };
-
-        // Manual points hanya ditambahkan pada mode 'alltime' & 'all' kategori
-        const baseManualPoints =
-          timeframe === 'alltime' && tcgCategory === 'all' ? Number(col.manual_points || 0) : 0;
-
-        const totalPoints = baseManualPoints + cStats.cardPoints;
-
-        // Tentukan kategori utama kolektor berdasarkan kartu terbanyak
-        const catDist = allTimeCatCountByCollector.get(col.id) || {
-          pokemon: 0,
-          onepiece: 0,
-          yugioh: 0,
-          other: 0,
-        };
-
-        let primaryCategory: 'pokemon' | 'onepiece' | 'yugioh' | 'other' = 'other';
-        let maxCatCards = 0;
-        (['pokemon', 'onepiece', 'yugioh', 'other'] as const).forEach((key) => {
-          if (catDist[key] > maxCatCards) {
-            maxCatCards = catDist[key];
-            primaryCategory = key;
-          }
-        });
-
-        const rawUsername = col.username.replace(/^@/, '');
+    const ranked = collectors
+      .map((c) => {
+        const cStats = cardStatsByCollector.get(c.id) || { cardPoints: 0, gemMintCount: 0 };
+        const totalPoints = Number(c.manual_points || 0) + cStats.cardPoints;
+        const rawUsername = c.username.replace(/^@/, '');
 
         return {
-          id: col.id,
-          username: `@${rawUsername}`,
+          id: c.id,
+          user_id: c.user_id,
+          username: c.username.startsWith('@') ? c.username : `@${c.username}`,
           rawUsername,
-          name: col.display_name || rawUsername,
-          primaryCategory,
-          primaryCategoryLabel: formatCategoryBadge(primaryCategory),
-          completedSets: Number(col.sets_completed || 0),
-          gem10Count: cStats.gem10Count,
+          displayName: c.display_name,
           totalPoints,
-          pointsFormatted: `${totalPoints.toLocaleString('id-ID')} PTS`,
-          badge: col.badge || 'Collector',
-          avatarBg: col.avatar_bg || 'from-indigo-500 to-purple-600',
-          hasActivityInFilter:
-            tcgCategory === 'all' ? true : cStats.categoryCount[tcgCategory] > 0,
+          completedSets: Number(c.sets_completed || 0),
+          gemMintCount: cStats.gemMintCount,
+          avatarBg: c.avatar_bg || 'from-indigo-500 to-purple-600',
         };
       })
-      .filter((item) => item.hasActivityInFilter)
-      .sort((a, b) => b.totalPoints - a.totalPoints || b.gem10Count - a.gem10Count);
+      .sort((a, b) => b.totalPoints - a.totalPoints);
 
-    return computed.map((item, idx) => ({
-      ...item,
-      rank: idx + 1,
-    }));
-  }, [collectors, cards, tcgCategory, timeframe]);
-
-  // Susun Top 3 Podium dengan urutan visual [Rank 2, Rank 1, Rank 3]
-  const podiumCollectors = useMemo(() => {
-    const top3 = rankedCollectors.slice(0, 3);
-    if (top3.length === 0) return [];
-
-    const ordered = [top3[1], top3[0], top3[2]].filter(Boolean);
-
-    return ordered.map((item) => {
-      const styleMap =
-        item.rank === 1
-          ? {
-              avatarStyle: 'bg-amber-500/20 border-amber-500/50 text-amber-400',
-              podiumBg: 'border-amber-500/50 bg-card-hitam',
-            }
-          : item.rank === 2
-          ? {
-              avatarStyle: 'bg-gray-400/20 border-gray-400/40 text-gray-200',
-              podiumBg: 'border-gray-500/40 bg-card-hitam',
-            }
-          : {
-              avatarStyle: 'bg-amber-800/30 border-amber-700/50 text-amber-500',
-              podiumBg: 'border-amber-800/40 bg-card-hitam',
-            };
+    return ranked.map((item, idx) => {
+      const rank = idx + 1;
+      const badgeColor =
+        rank === 1
+          ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30'
+          : rank === 2
+            ? 'text-muted-hitam bg-elevated-putih border-line-putih'
+            : rank === 3
+              ? 'text-amber-700 dark:text-amber-600 bg-amber-600/10 border-amber-600/30'
+              : 'text-subtle-hitam bg-elevated-putih border-line-putih-soft';
 
       return {
         ...item,
-        ...styleMap,
+        rank,
+        badgeColor,
       };
     });
-  }, [rankedCollectors]);
+  }, [collectors, cards, selectedSubCategory]);
 
-  // Filter Pencarian pada Tabel Klasemen
   const filteredLeaderboard = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return rankedCollectors;
-
-    return rankedCollectors.filter(
-      (collector) =>
-        collector.username.toLowerCase().includes(query) ||
-        collector.name.toLowerCase().includes(query) ||
-        collector.badge.toLowerCase().includes(query)
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return fullLeaderboard;
+    return fullLeaderboard.filter(
+      (item) =>
+        item.username.toLowerCase().includes(q) ||
+        item.displayName.toLowerCase().includes(q)
     );
-  }, [rankedCollectors, searchQuery]);
+  }, [fullLeaderboard, searchQuery]);
+
+  const displayedLeaderboard = useMemo(() => {
+    return filteredLeaderboard.slice(0, 10);
+  }, [filteredLeaderboard]);
+
+  const currentUserRankData = useMemo(() => {
+    if (fullLeaderboard.length === 0) return null;
+    const found = fullLeaderboard.find((item) => item.id === currentUserId || item.user_id === currentUserId);
+    return found || fullLeaderboard[11] || fullLeaderboard[0] || null;
+  }, [fullLeaderboard, currentUserId]);
 
   return (
-    <div className="bg-surface text-foreground-hitam min-h-screen pt-28 pb-20 transition-colors duration-300 relative">
-      <div className="max-w-7xl mx-auto px-6 space-y-12">
-        
-        {/* ========================================================================= */}
-        {/* 1. BREADCRUMB & HEADER                                                    */}
-        {/* ========================================================================= */}
+    <div className="bg-surface text-foreground-hitam min-h-screen pt-28 pb-20 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6 space-y-10">
+
+        {/* BREADCRUMB & HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <Link
             href="/set-registry"
@@ -336,299 +244,205 @@ export default function LeaderboardPage() {
           >
             <ArrowLeft className="w-4 h-4" /> Kembali ke Set Registry
           </Link>
-
-          <span className="text-xs font-mono text-muted-hitam bg-elevated-putih border border-line-putih px-3 py-1.5 rounded-lg w-fit">
-            SEASON 2026 • OFFICIAL AUDITED RANKINGS
-          </span>
         </div>
 
-        {/* HERO TITLE */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-accent-soft border border-accent-border text-[11px] font-extrabold text-accent uppercase tracking-widest">
-            <Trophy className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-            NATIONAL HALL OF FAME
+            <Trophy className="w-3.5 h-3.5 text-amber-500" />
+            KLASEMEN KOLEKTOR TERBAIK
           </span>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground-hitam tracking-tight leading-tight">
-            Klasemen Kolektor <span className="text-accent">Nasional ICS</span>
+            Papan Peringkat <span className="text-accent">Kolektor Nasional</span>
           </h1>
 
           <p className="text-muted-hitam text-xs sm:text-sm leading-relaxed">
-            Papan peringkat resmi kolektor kartu bersertifikasi ICS di Indonesia berdasarkan akumulasi skor registry, kelengkapan set, dan jumlah koleksi Gem Mint 10.
+            Akumulasi skor portofolio set registry, jumlah kelengkapan master set, dan slab Gem Mint 10 terbanyak di Indonesia.
           </p>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 2. TOP 3 PODIUM DISPLAY (LIVE DARI SUPABASE)                              */}
-        {/* ========================================================================= */}
-        {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center text-muted-hitam gap-2">
-            <Loader2 className="w-7 h-7 animate-spin text-accent" />
-            <span className="text-xs">Menghitung peringkat podium kolektor nasional...</span>
-          </div>
-        ) : podiumCollectors.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 items-end max-w-5xl mx-auto">
-            {podiumCollectors.map((item) => (
-              <div
-                key={item.id}
-                className={`rounded-3xl border p-6 text-center space-y-4 shadow-2xl backdrop-blur-md relative transition-transform hover:scale-[1.02] duration-300 ${item.podiumBg} ${
-                  item.rank === 1 ? 'order-first md:order-2 py-8' : item.rank === 2 ? 'order-2 md:order-1' : 'order-3'
-                }`}
-              >
-                {/* Ambient Glow untuk Juara 1 */}
-                {item.rank === 1 && (
-                  <div className="absolute inset-0 bg-amber-500/10 blur-2xl rounded-3xl pointer-events-none" />
-                )}
+        {/* SEARCH, DROPDOWN KATEGORI UTAMA, & SUB-KATEGORI DI SAMPINGNYA */}
+        <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xs">
 
-                {/* Crown / Rank Icon */}
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                  {item.rank === 1 ? (
-                    <span className="w-9 h-9 rounded-full bg-amber-500 text-black font-black flex items-center justify-center shadow-lg shadow-amber-500/40 border-2 border-amber-300">
-                      <Crown className="w-5 h-5" />
-                    </span>
-                  ) : item.rank === 2 ? (
-                    <span className="w-8 h-8 rounded-full bg-gray-300 text-black font-bold flex items-center justify-center shadow-md">
-                      2
-                    </span>
-                  ) : (
-                    <span className="w-8 h-8 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center shadow-md">
-                      3
-                    </span>
-                  )}
-                </div>
-
-                {/* Collector Info */}
-                <div className="space-y-1.5 pt-2 relative z-10">
-                  <CollectorAvatar
-                    avatarBg={item.avatarBg}
-                    username={item.rawUsername}
-                    sizeClass="w-16 h-16 mx-auto"
-                    textSizeClass="text-xl"
-                    shapeClass="rounded-full"
-                    borderClass="border-2 shadow-xl"
-                    fallbackBgClass={item.avatarStyle}
-                  />
-
-                  <div className="pt-2">
-                    <h3 className="text-base font-bold text-foreground-putih flex items-center justify-center gap-1">
-                      {item.username}
-                      <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    </h3>
-                    <span className="text-[11px] text-muted-putih">{item.name}</span>
-                  </div>
-
-                  <span className="inline-block text-[10px] font-mono font-bold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-                    {item.badge}
-                  </span>
-                </div>
-
-                {/* Score Highlight */}
-                <div className="bg-elevated-hitam border border-line-hitam-soft rounded-2xl p-3 space-y-1 relative z-10">
-                  <span className="text-[10px] text-subtle-putih uppercase font-mono block">
-                    TOTAL REGISTRY POINTS
-                  </span>
-                  <span className="text-lg font-black text-red-400 font-mono">
-                    {item.pointsFormatted}
-                  </span>
-                  <div className="flex justify-between text-[11px] text-muted-putih font-mono pt-1 border-t border-line-hitam-soft">
-                    <span>{item.completedSets} Set Selesai</span>
-                    <span className="text-amber-400 font-bold">{item.gem10Count} Gem Mint 10</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        {/* ========================================================================= */}
-        {/* 3. SEARCH & FILTER CONTROLS (CARD PUTIH)                                  */}
-        {/* ========================================================================= */}
-        <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
-          
-          {/* Search Box */}
-          <div className="relative w-full md:w-80">
+          <div className="relative w-full lg:w-72">
             <Search className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Cari username atau nama kolektor..."
+              placeholder="Cari username kolektor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam placeholder-subtle-hitam focus:outline-none focus:border-red-500/60 transition-colors"
             />
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            
-            {/* TCG Category Switcher */}
-            <div className="flex items-center gap-1 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft">
-              <button
-                type="button"
-                onClick={() => setTcgCategory('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                  tcgCategory === 'all' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+
+            {/* Dropdown Kategori Utama */}
+            <div className="relative w-full sm:w-48">
+              <select
+                value={selectedMainCategory}
+                onChange={(e) => handleMainCategoryChange(e.target.value)}
+                className="w-full appearance-none bg-elevated-putih border border-line-putih rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-foreground-hitam focus:outline-none focus:border-red-500/60 transition-colors cursor-pointer"
               >
-                Semua TCG
-              </button>
-              <button
-                type="button"
-                onClick={() => setTcgCategory('pokemon')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                  tcgCategory === 'pokemon' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-              >
-                Pokémon
-              </button>
-              <button
-                type="button"
-                onClick={() => setTcgCategory('onepiece')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                  tcgCategory === 'onepiece' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-              >
-                One Piece
-              </button>
-              <button
-                type="button"
-                onClick={() => setTcgCategory('yugioh')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
-                  tcgCategory === 'yugioh' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-              >
-                Yu-Gi-Oh!
-              </button>
+                <option value="all">Semua Kategori</option>
+                {productCategories.map((cat) => (
+                  <option key={cat.id} value={cat.slug}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-subtle-hitam absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
-            {/* Timeframe Switcher */}
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value as TimeframeFilter)}
-              className="bg-elevated-putih border border-line-putih text-foreground-hitam text-xs font-bold rounded-xl px-3 py-2 focus:outline-none focus:border-red-500/60 cursor-pointer"
-            >
-              <option value="alltime">All Time (Sepanjang Masa)</option>
-              <option value="season2026">Season 2026</option>
-              <option value="monthly">Bulan Ini (30 Hari)</option>
-            </select>
+            {/* Tombol Sub-Kategori */}
+            <div className="flex items-center gap-1.5 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft overflow-x-auto scrollbar-thin scrollbar-thumb-red-600/35 w-full sm:w-auto max-w-xl">
+              <button
+                type="button"
+                onClick={() => setSelectedSubCategory('all')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedSubCategory === 'all' ? 'bg-red-600 text-white shadow-sm' : 'text-muted-hitam hover:text-foreground-hitam'
+                  }`}
+              >
+                Semua Sub
+              </button>
+
+              {availableSubCategories.map((subKey) => (
+                <button
+                  key={subKey}
+                  type="button"
+                  onClick={() => setSelectedSubCategory(subKey)}
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedSubCategory === subKey ? 'bg-red-600 text-white shadow-sm' : 'text-muted-hitam hover:text-foreground-hitam'
+                    }`}
+                >
+                  {formatLabel(subKey)}
+                </button>
+              ))}
+            </div>
+
           </div>
 
         </div>
 
-        {/* ========================================================================= */}
-        {/* 4. FULL LEADERBOARD TABLE (LIVE DARI SUPABASE)                            */}
-        {/* ========================================================================= */}
+        {/* TABEL UTAMA (TOP 10 + ROW PERINGKAT ANDA DI PALING BAWAH TABEL) */}
         <div className="bg-card-putih border border-line-putih rounded-3xl overflow-hidden shadow-sm">
-          {loading ? (
-            <div className="py-16 flex flex-col items-center justify-center text-muted-hitam gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-accent" />
-              <span className="text-xs">Memuat daftar peringkat kolektor...</span>
+          <div className="p-6 border-b border-line-putih flex items-center justify-between bg-elevated-putih">
+            <div className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-accent" />
+              <h2 className="text-base font-extrabold text-foreground-hitam">Top 10 Peringkat Utama</h2>
             </div>
-          ) : filteredLeaderboard.length === 0 ? (
-            <div className="py-16 text-center space-y-2 px-4">
+            <span className="text-xs text-muted-hitam font-mono">
+              Menampilkan {displayedLeaderboard.length} dari {filteredLeaderboard.length} Kolektor
+            </span>
+          </div>
+
+          {loading ? (
+            <div className="py-20 flex flex-col items-center justify-center text-muted-hitam gap-2">
+              <Loader2 className="w-6 h-6 animate-spin text-accent" />
+              <span className="text-xs">Memuat papan klasemen nasional...</span>
+            </div>
+          ) : displayedLeaderboard.length === 0 ? (
+            <div className="py-20 text-center space-y-2 px-4">
               <Database className="w-8 h-8 text-subtle-hitam mx-auto" />
-              <p className="text-sm font-bold text-foreground-hitam">Data kolektor tidak ditemukan</p>
-              <p className="text-xs text-muted-hitam">
-                Coba ubah filter kategori, rentang waktu, atau kata kunci pencarian.
-              </p>
+              <p className="text-sm font-bold text-foreground-hitam">Tidak ada kolektor yang ditemukan</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-line-putih text-[10px] font-bold uppercase tracking-wider text-muted-hitam bg-elevated-putih">
-                    <th className="py-4 px-6 text-center">RANK</th>
-                    <th className="py-4 px-6">KOLEKTOR</th>
-                    <th className="py-4 px-6 text-center">KATEGORI UTAMA</th>
+                  <tr className="border-b border-line-putih text-[10px] font-bold uppercase tracking-wider text-muted-hitam bg-elevated-putih/50">
+                    <th className="py-4 px-6 text-center w-20">RANK</th>
+                    <th className="py-4 px-6">NAMA KOLEKTOR</th>
                     <th className="py-4 px-6 text-center">SET SELESAI</th>
                     <th className="py-4 px-6 text-center">GEM MINT 10 SLAB</th>
-                    <th className="py-4 px-6 text-right">TOTAL REGISTRY POINTS</th>
-                    <th className="py-4 px-6 text-right">PROFIL</th>
+                    <th className="py-4 px-6 text-right">TOTAL SKOR REGISTRY</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-line-putih-soft font-mono">
-                  {filteredLeaderboard.map((row) => (
+                <tbody className="divide-y divide-line-putih-soft">
+                  {displayedLeaderboard.map((row) => (
                     <tr key={row.id} className="hover:bg-elevated-putih/70 transition-colors">
-                      
-                      {/* Rank Number */}
                       <td className="py-4 px-6 text-center">
                         <span
-                          className={`inline-flex items-center justify-center w-8 h-8 rounded-xl font-black text-xs border ${
-                            row.rank === 1
-                              ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/40'
-                              : row.rank === 2
-                              ? 'text-muted-hitam bg-elevated-putih border-line-putih'
-                              : row.rank === 3
-                              ? 'text-amber-700 dark:text-amber-600 bg-amber-600/10 border-amber-600/30'
-                              : 'text-subtle-hitam bg-elevated-putih border-line-putih-soft'
-                          }`}
+                          className={`inline-flex items-center justify-center w-8 h-8 rounded-xl font-extrabold text-xs border font-mono ${row.badgeColor}`}
                         >
                           {row.rank}
                         </span>
                       </td>
-
-                      {/* Collector Name & Username */}
-                      <td className="py-4 px-6 font-sans">
+                      <td className="py-4 px-6 font-sans font-bold text-foreground-hitam">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-9 h-9 rounded-full bg-gradient-to-br ${row.avatarBg} text-white font-bold flex items-center justify-center shrink-0 shadow-xs`}
-                          >
-                            {row.rawUsername.charAt(0).toUpperCase()}
-                          </div>
+                          <CollectorAvatar
+                            avatarBg={row.avatarBg}
+                            username={row.rawUsername}
+                            sizeClass="w-10 h-10"
+                            textSizeClass="text-sm"
+                            shapeClass="rounded-full"
+                            borderClass="shadow-xs"
+                          />
                           <div>
-                            <strong className="text-foreground-hitam font-bold flex items-center gap-1.5">
-                              {row.username}
-                              <UserCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                            </strong>
-                            <span className="text-[11px] text-subtle-hitam block font-normal">
-                              {row.name}
+                            <span className="block text-sm">{row.username}</span>
+                            {row.displayName && (
+                              <span className="text-[11px] font-normal text-subtle-hitam block">
+                                {row.displayName}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6 text-center text-muted-hitam font-mono">{row.completedSets} Set</td>
+                      <td className="py-4 px-6 text-center text-amber-600 dark:text-amber-400 font-bold font-mono">
+                        {row.gemMintCount} Kartu
+                      </td>
+                      <td className="py-4 px-6 text-right font-black text-accent text-sm font-mono">
+                        {row.totalPoints.toLocaleString('id-ID')} PTS
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* ROW KHUSUS: PERINGKAT ANDA DI PALING BAWAH TABEL */}
+                  {currentUserRankData && (
+                    <tr className="bg-red-500/5 dark:bg-red-500/10 border-t-2 border-red-500/30">
+                      <td className="py-4 px-6 text-center">
+                        <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-xl font-extrabold text-xs bg-red-600 text-white font-mono shadow-sm">
+                          #{currentUserRankData.rank}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 font-sans font-bold text-foreground-hitam">
+                        <div className="flex items-center gap-3">
+                          <CollectorAvatar
+                            avatarBg={currentUserRankData.avatarBg}
+                            username={currentUserRankData.rawUsername}
+                            sizeClass="w-10 h-10"
+                            textSizeClass="text-sm"
+                            shapeClass="rounded-full"
+                          />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="block text-sm">{currentUserRankData.username}</span>
+                              <span className="text-[10px] font-extrabold bg-red-600/20 text-red-500 border border-red-500/30 px-2 py-0.5 rounded-md">
+                                Peringkat Anda
+                              </span>
+                            </div>
+                            <span className="text-[11px] font-normal text-subtle-hitam block">
+                              {currentUserRankData.displayName}
                             </span>
                           </div>
                         </div>
                       </td>
-
-                      {/* Category Tag */}
-                      <td className="py-4 px-6 text-center font-sans font-semibold">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-hitam bg-elevated-putih px-2.5 py-1 rounded-md border border-line-putih-soft">
-                          {row.primaryCategoryLabel}
-                        </span>
+                      <td className="py-4 px-6 text-center text-muted-hitam font-mono">{currentUserRankData.completedSets} Set</td>
+                      <td className="py-4 px-6 text-center text-amber-600 dark:text-amber-400 font-bold font-mono">
+                        {currentUserRankData.gemMintCount} Kartu
                       </td>
-
-                      {/* Completed Sets */}
-                      <td className="py-4 px-6 text-center text-muted-hitam font-bold">
-                        {row.completedSets} Set
+                      <td className="py-4 px-6 text-right font-black text-accent text-sm font-mono">
+                        {currentUserRankData.totalPoints.toLocaleString('id-ID')} PTS
                       </td>
-
-                      {/* Gem Mint 10 Slabs */}
-                      <td className="py-4 px-6 text-center text-amber-600 dark:text-amber-400 font-bold">
-                        {row.gem10Count} Slabs
-                      </td>
-
-                      {/* Total Points */}
-                      <td className="py-4 px-6 text-right font-black text-accent text-sm">
-                        {row.pointsFormatted}
-                      </td>
-
-                      {/* Action Link */}
-                      <td className="py-4 px-6 text-right font-sans">
-                        <Link
-                          href={`/set-registry/user/${row.rawUsername}`}
-                          className="text-xs font-bold text-muted-hitam hover:text-foreground-hitam inline-flex items-center gap-1 bg-elevated-putih hover:bg-gray-200/70 dark:hover:bg-white/10 border border-line-putih px-3 py-1.5 rounded-lg transition-colors"
-                        >
-                          Vault <ExternalLink className="w-3.5 h-3.5" />
-                        </Link>
-                      </td>
-
                     </tr>
-                  ))}
+                  )}
+
                 </tbody>
               </table>
             </div>
           )}
         </div>
 
-        {/* ========================================================================= */}
-        {/* 5. SCORING METHODOLOGY EXPLANATION CARD (CARD HITAM KONTRAS)              */}
-        {/* ========================================================================= */}
+        {/* SCORING METHODOLOGY EXPLANATION CARD (TETAP UTUH DI BAGIAN BAWAH) */}
         <div className="bg-card-hitam border border-line-hitam rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl backdrop-blur-md">
           <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase tracking-widest">
             <HelpCircle className="w-4 h-4" /> METODOLOGI SKOR REGISTRY ICS
@@ -665,7 +479,6 @@ export default function LeaderboardPage() {
         </div>
 
       </div>
-
     </div>
   );
 }

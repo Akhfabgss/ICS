@@ -137,7 +137,7 @@ export default function NavbarRegistry() {
       <div className="bg-card-hitam border-b border-line-hitam-soft text-[11px] text-muted-putih">
         <div className="max-w-7xl mx-auto px-6 h-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-mono tracking-wider uppercase text-[10px]">
+            <span className="tracking-wider uppercase text-[10px] font-medium">
               ICS ECOSYSTEM - <strong className="text-foreground-putih">SET REGISTRY PORTAL</strong>
             </span>
           </div>

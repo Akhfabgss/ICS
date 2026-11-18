@@ -29,7 +29,7 @@ export default function FooterRegistry() {
                 <span className="font-bold text-sm tracking-tight text-foreground-putih block">
                   ICS SET REGISTRY & VAULT
                 </span>
-                <span className="text-[11px] font-mono text-red-600">
+                <span className="text-[11px] font-semibold text-red-500">
                   Indonesia Collectibles Standar
                 </span>
               </div>
@@ -47,27 +47,32 @@ export default function FooterRegistry() {
             {/* Column 1: Eksplorasi Set */}
             <div className="space-y-3">
               <h4 className="font-bold text-foreground-putih uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-red-500" /> Kategori Set
+                <Layers className="w-3.5 h-3.5 text-red-500" /> Navigasi Registry
               </h4>
-              <ul className="space-y-2 text-muted-putih">
+              <ul className="space-y-2 text-muted-putih text-xs">
                 <li>
                   <Link href="/set-registry" className="hover:text-foreground-putih transition-colors">
-                    Pokémon TCG Sets
+                    Beranda Set Registry
                   </Link>
                 </li>
                 <li>
-                  <Link href="/set-registry" className="hover:text-foreground-putih transition-colors">
-                    One Piece Card Game
+                  <Link href="/set-registry/katalog" className="hover:text-foreground-putih transition-colors">
+                    Direktori Katalog & Sub-Kategori
                   </Link>
                 </li>
                 <li>
-                  <Link href="/set-registry" className="hover:text-foreground-putih transition-colors">
-                    Yu-Gi-Oh! OCG/TCG
+                  <Link href="/set-registry/pop-report" className="hover:text-foreground-putih transition-colors">
+                    ICS Population Report (Pop Report)
                   </Link>
                 </li>
                 <li>
-                  <Link href="/set-registry" className="hover:text-foreground-putih transition-colors">
-                    Magic: The Gathering
+                  <Link href="/set-registry/klasemen" className="hover:text-foreground-putih transition-colors">
+                    Klasemen Kolektor Nasional
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/check-ics" className="hover:text-foreground-putih transition-colors">
+                    Verifikasi Sertifikat (Check ICS)
                   </Link>
                 </li>
               </ul>
@@ -137,12 +142,12 @@ export default function FooterRegistry() {
         {/* Bottom Copyright & Security Note */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-subtle-putih">
           <p>© 2026 Indonesia Collectibles Standar (ICS) — Set Registry Division. All rights reserved.</p>
-          <div className="flex items-center gap-4 font-mono">
+          <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-red-500" /> NXP NTAG 424 Encrypted
             </span>
             <span className="flex items-center gap-1">
-              <Database className="w-3.5 h-3.5 text-red-500" /> Immutable Ledger
+              <Database className="w-3.5 h-3.5 text-red-500" /> Database Terverifikasi
             </span>
           </div>
         </div>

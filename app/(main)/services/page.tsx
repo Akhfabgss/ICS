@@ -132,7 +132,7 @@ export default function ServicesPage() {
                     <h4 className="text-xs font-bold text-foreground-putih">Registri Digital Nasional</h4>
                   </div>
                   <p className="text-[11px] text-muted-putih leading-normal">
-                    Pencatatan ledger permanen, populasi grade terbuka, dan transfer kepemilikan aman.
+                    Pencatatan database digital permanen, populasi grade terbuka, dan verifikasi kepemilikan aman.
                   </p>
                 </div>
 
