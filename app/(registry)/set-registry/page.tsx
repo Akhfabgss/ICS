@@ -5,6 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import CollectorAvatar from '@/components/CollectorAvatar';
+import RegistryCategoryFilter, {
+  type ProductCategoryItem,
+  matchItemCategory,
+} from '@/components/RegistryCategoryFilter';
 import {
   Trophy,
   Search,
@@ -136,8 +140,11 @@ function resolveValidImageUrl(url: string | null | undefined): string {
 }
 
 export default function SetRegistryHomePage() {
-  // State Filter TCG Dinamis
+  // State Filter Kategori & Sub-Kategori Terpusat
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedSubType, setSelectedSubType] = useState<string>('all');
+  const [productCategories, setProductCategories] = useState<ProductCategoryItem[]>([]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -406,11 +413,16 @@ export default function SetRegistryHomePage() {
     };
   }, [cards, collectorMap]);
 
-  // Filter Set berdasarkan tab kategori dinamis & pencarian
+  // Filter Set berdasarkan kategori, sub-kategori terpusat & pencarian
   const filteredSets = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return aggregatedSets.filter((set) => {
-      const matchesCategory = selectedCategory === 'all' || set.categoryRaw.toLowerCase() === selectedCategory.toLowerCase();
+      const matchesCategory = matchItemCategory(
+        set.categoryRaw,
+        selectedCategory,
+        selectedSubType,
+        productCategories
+      );
       const matchesSearch =
         !query ||
         set.title.toLowerCase().includes(query) ||
@@ -418,7 +430,7 @@ export default function SetRegistryHomePage() {
         set.categoryRaw.toLowerCase().includes(query);
       return matchesCategory && matchesSearch;
     });
-  }, [aggregatedSets, selectedCategory, searchQuery]);
+  }, [aggregatedSets, selectedCategory, selectedSubType, productCategories, searchQuery]);
 
   const activeSlideData = HERO_BANNERS[currentSlide];
 
@@ -578,24 +590,28 @@ export default function SetRegistryHomePage() {
                         </span>
                       </td>
                       <td className="py-4 px-4 font-sans font-bold text-foreground-hitam">
-                        <div className="flex items-center gap-2">
+                        <Link
+                          href={`/set-registry/user/${encodeURIComponent(row.rawUsername)}`}
+                          className="flex items-center gap-2 group/link hover:text-accent transition-colors"
+                          title={`Lihat profil ${row.username}`}
+                        >
                           <CollectorAvatar
                             avatarBg={row.avatarBg}
                             username={row.rawUsername}
                             sizeClass="w-9 h-9"
                             textSizeClass="text-sm"
                             shapeClass="rounded-full"
-                            borderClass="shadow-xs"
+                            borderClass="shadow-xs group-hover/link:ring-2 group-hover/link:ring-accent transition-all"
                           />
                           <div>
-                            <span className="block">{row.username}</span>
+                            <span className="block group-hover/link:underline">{row.username}</span>
                             {row.displayName && (
                               <span className="text-[11px] font-normal text-subtle-hitam block">
                                 {row.displayName}
                               </span>
                             )}
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="py-4 px-4 text-center text-muted-hitam">{row.completedSets} Set</td>
                       <td className="py-4 px-4 text-center text-amber-600 dark:text-amber-400 font-bold">
@@ -613,9 +629,9 @@ export default function SetRegistryHomePage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 4. FEATURED SETS CATALOG & CATEGORY SWITCHER DINAMIS DARI DATABASE        */}
+        {/* 4. FEATURED SETS CATALOG & REGISTRY CATEGORY FILTER TERPUSAT              */}
         {/* ========================================================================= */}
-        <div className="space-y-8">
+        <div className="space-y-6">
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line-putih-soft pb-4">
             <div>
@@ -623,37 +639,23 @@ export default function SetRegistryHomePage() {
                 KATALOG RELEASES
               </span>
               <h2 className="text-2xl font-extrabold text-foreground-hitam mt-0.5 flex items-center gap-2">
-                <Layers className="w-6 h-6 text-accent" /> Set TCG Populer (Maks. 6 Set)
+                <Layers className="w-6 h-6 text-accent" /> Set Populer (Maks. 6 Set)
               </h2>
             </div>
-
-            {/* Category Switcher Dinamis Berdasarkan tcg_type di database */}
-            <div className="flex items-center gap-1.5 bg-card-putih border border-line-putih p-1 rounded-xl overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === 'all'
-                  ? 'bg-red-600 text-white'
-                  : 'text-muted-hitam hover:text-foreground-hitam'
-                  }`}
-              >
-                Semua TCG
-              </button>
-              {dynamicCategories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory.toLowerCase() === cat.toLowerCase()
-                    ? 'bg-red-600 text-white'
-                    : 'text-muted-hitam hover:text-foreground-hitam'
-                    }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
           </div>
+
+          {/* Kontrol Filter Kategori & Sub-Kategori Terpusat */}
+          <RegistryCategoryFilter
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            selectedSubType={selectedSubType}
+            onSubTypeChange={setSelectedSubType}
+            categories={productCategories}
+            onCategoriesLoaded={setProductCategories}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Cari set rilis..."
+          />
 
           {loading ? (
             <div className="bg-card-putih border border-line-putih rounded-2xl p-12 flex flex-col items-center justify-center text-muted-hitam gap-2">
@@ -709,9 +711,19 @@ export default function SetRegistryHomePage() {
                         </div>
                         <div className="flex justify-between">
                           <span>Peringkat 1 Set:</span>
-                          <strong className="text-emerald-600 dark:text-emerald-400 truncate max-w-[160px]">
-                            {set.completionLeader}
-                          </strong>
+                          {set.completionLeader && set.completionLeader !== 'Belum Diklaim' && set.completionLeader !== 'Belum Ada' ? (
+                            <Link
+                              href={`/set-registry/user/${encodeURIComponent(set.completionLeader.replace(/^@/, ''))}`}
+                              className="text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[160px] hover:underline"
+                              title={`Lihat profil ${set.completionLeader}`}
+                            >
+                              {set.completionLeader}
+                            </Link>
+                          ) : (
+                            <strong className="text-emerald-600 dark:text-emerald-400 truncate max-w-[160px]">
+                              {set.completionLeader}
+                            </strong>
+                          )}
                         </div>
                       </div>
                     </div>

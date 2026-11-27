@@ -181,8 +181,8 @@ function CheckIcsDetailContent() {
     : certData?.collectors?.display_name || certData?.collectors?.full_name || null;
 
   const collectorSlug = certData?.collectors?.username
-    ? certData.collectors.username.replace('@', '')
-    : 'kyoto';
+    ? certData.collectors.username.replace('@', '').trim()
+    : certData?.collector_id || '';
 
   return (
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 md:pt-32 pb-20 transition-colors duration-300">
@@ -452,26 +452,48 @@ function CheckIcsDetailContent() {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 items-center justify-between p-3.5 bg-elevated-hitam border border-line-hitam-soft rounded-2xl text-xs">
-                    <div className="flex items-center gap-2.5">
-                      <CollectorAvatar
-                        avatarBg={certData.collectors?.avatar_bg}
-                        username={collectorHandle || 'U'}
-                        sizeClass="w-8 h-8"
-                        textSizeClass="text-xs"
-                        shapeClass="rounded-full"
-                        fallbackBgClass="bg-red-600/20 text-red-500"
-                      />
-                      <div>
-                        <span className="text-subtle-putih text-[10px] block">PEMILIK TERDAFTAR</span>
-                        <strong className="text-foreground-putih">
-                          {collectorHandle || 'UNCLAIMED (Belum Diklaim di Registry)'}
-                        </strong>
-                      </div>
-                    </div>
-
-                    {collectorHandle ? (
+                    {collectorHandle && collectorSlug ? (
                       <Link
-                        href={`/set-registry/user/${collectorSlug}`}
+                        href={`/set-registry/user/${encodeURIComponent(collectorSlug)}`}
+                        className="flex items-center gap-2.5 group hover:opacity-90 transition-opacity"
+                      >
+                        <CollectorAvatar
+                          avatarBg={certData.collectors?.avatar_bg}
+                          username={collectorHandle || 'U'}
+                          sizeClass="w-8 h-8"
+                          textSizeClass="text-xs"
+                          shapeClass="rounded-full"
+                          fallbackBgClass="bg-red-600/20 text-red-500"
+                        />
+                        <div>
+                          <span className="text-subtle-putih text-[10px] block">PEMILIK TERDAFTAR</span>
+                          <strong className="text-foreground-putih group-hover:text-accent transition-colors">
+                            {collectorHandle}
+                          </strong>
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2.5">
+                        <CollectorAvatar
+                          avatarBg={certData?.collectors?.avatar_bg}
+                          username="U"
+                          sizeClass="w-8 h-8"
+                          textSizeClass="text-xs"
+                          shapeClass="rounded-full"
+                          fallbackBgClass="bg-red-600/20 text-red-500"
+                        />
+                        <div>
+                          <span className="text-subtle-putih text-[10px] block">PEMILIK TERDAFTAR</span>
+                          <strong className="text-foreground-putih">
+                            UNCLAIMED (Belum Diklaim di Registry)
+                          </strong>
+                        </div>
+                      </div>
+                    )}
+
+                    {collectorHandle && collectorSlug ? (
+                      <Link
+                        href={`/set-registry/user/${encodeURIComponent(collectorSlug)}`}
                         className="text-red-400 hover:text-red-300 font-bold flex items-center gap-1 text-[11px] mt-4 md:mt-0 justify-end"
                       >
                         Lihat Koleksi di Registry <ExternalLink className="w-3.5 h-3.5" />

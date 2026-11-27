@@ -210,8 +210,12 @@ function UserVaultContent({ params }: PageProps) {
 
         const targetLower = usernameParam.toLowerCase();
         const found =
-          cols.find((c) => c.username.replace(/^@/, '').trim().toLowerCase() === targetLower) ||
-          null;
+          cols.find(
+            (c) =>
+              c.username.replace(/^@/, '').trim().toLowerCase() === targetLower ||
+              c.id.toLowerCase() === targetLower ||
+              (c.user_id && c.user_id.toLowerCase() === targetLower)
+          ) || null;
 
         setCollector(found);
         setAllCollectors(cols);

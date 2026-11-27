@@ -4,15 +4,25 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import CollectorAvatar from '@/components/CollectorAvatar';
+import RegistryCategoryFilter, {
+  type ProductCategoryItem,
+  matchItemCategory,
+  formatSubTypeLabel,
+} from '@/components/RegistryCategoryFilter';
 import {
   Trophy,
-  Search,
   ArrowLeft,
   Loader2,
   Database,
   Award,
-  ChevronDown,
   HelpCircle,
+  Crown,
+  Medal,
+  ArrowRight,
+  Info,
+  ExternalLink,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 
 // =========================================================================
@@ -37,13 +47,6 @@ interface CardRegistryRow {
   tcg_type: string | null;
 }
 
-interface ProductCategoryRow {
-  id: string;
-  name: string;
-  slug: string;
-  sub_types: string[];
-}
-
 interface LeaderboardItem {
   id: string;
   user_id: string | null;
@@ -61,7 +64,7 @@ interface LeaderboardItem {
 export default function KlasemenPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // State Filter Kategori Utama (Dropdown) & Sub-Kategori
+  // State Filter Terpusat (Kategori Utama & Sub-Kategori)
   const [selectedMainCategory, setSelectedMainCategory] = useState<string>('all');
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('all');
 
@@ -69,10 +72,29 @@ export default function KlasemenPage() {
   const [loading, setLoading] = useState(true);
   const [collectors, setCollectors] = useState<CollectorRow[]>([]);
   const [cards, setCards] = useState<CardRegistryRow[]>([]);
-  const [productCategories, setProductCategories] = useState<ProductCategoryRow[]>([]);
+  const [productCategories, setProductCategories] = useState<ProductCategoryItem[]>([]);
 
-  const [currentUserId] = useState<string | null>(null);
+  // State Autentikasi Pengguna
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
 
+  // 1. Fetch Session Pengguna
+  useEffect(() => {
+    async function checkAuth() {
+      const { data } = await supabase.auth.getUser();
+      setAuthUserId(data?.user?.id || null);
+    }
+    checkAuth();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUserId(session?.user?.id || null);
+    });
+
+    return () => {
+      listener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  // 2. Fetch Data Klasemen & Kategori
   useEffect(() => {
     let isMounted = true;
 
@@ -89,8 +111,9 @@ export default function KlasemenPage() {
             .eq('is_frozen', false),
           supabase
             .from('product_categories')
-            .select('id, name, slug, sub_types')
-            .eq('status', 'Active'),
+            .select('id, name, slug, status, sub_types')
+            .eq('status', 'Active')
+            .order('name', { ascending: true }),
         ]);
 
         if (!isMounted) return;
@@ -102,7 +125,7 @@ export default function KlasemenPage() {
         else setCards((cardsRes.data as CardRegistryRow[]) || []);
 
         if (catRes.error) console.error('Error categories:', catRes.error.message);
-        else setProductCategories((catRes.data as ProductCategoryRow[]) || []);
+        else setProductCategories((catRes.data as ProductCategoryItem[]) || []);
       } catch (err) {
         console.error('Unexpected error loading leaderboard:', err);
       } finally {
@@ -116,40 +139,33 @@ export default function KlasemenPage() {
     };
   }, []);
 
-  // =========================================================================
-  // 1. AMBIL SUB-KATEGORI BERDASARKAN DROPDOWN KATEGORI UTAMA YANG DIPILIH
-  // =========================================================================
-  const availableSubCategories = useMemo(() => {
-    if (selectedMainCategory === 'all') {
-      const allSubs = new Set<string>();
-      productCategories.forEach((cat) => {
-        if (Array.isArray(cat.sub_types)) {
-          cat.sub_types.forEach((sub) => allSubs.add(sub.trim().toUpperCase()));
-        }
-      });
-      return Array.from(allSubs);
+  // Label filter aktif untuk ditampilkan di badge kartu
+  const activeFilterLabel = useMemo(() => {
+    let catLabel = 'Semua Kategori';
+    if (selectedMainCategory !== 'all') {
+      const found = productCategories.find((c) => c.slug === selectedMainCategory);
+      catLabel = found?.name || selectedMainCategory;
     }
 
-    const foundCat = productCategories.find((cat) => cat.slug === selectedMainCategory);
-    if (!foundCat || !Array.isArray(foundCat.sub_types)) return [];
-    return foundCat.sub_types.map((sub) => sub.trim().toUpperCase());
-  }, [selectedMainCategory, productCategories]);
+    let subLabel = 'Semua Sub';
+    if (selectedSubCategory !== 'all') {
+      subLabel = formatSubTypeLabel(selectedSubCategory);
+    }
 
-  const handleMainCategoryChange = (slug: string) => {
-    setSelectedMainCategory(slug);
-    setSelectedSubCategory('all');
-  };
-
-  function formatLabel(raw: string): string {
-    return raw
-      .trim()
-      .split('_')
-      .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-      .join(' ');
-  }
+    if (selectedMainCategory === 'all' && selectedSubCategory === 'all') {
+      return 'Semua Kategori & Sub';
+    }
+    if (selectedMainCategory !== 'all' && selectedSubCategory === 'all') {
+      return `Kategori: ${catLabel}`;
+    }
+    if (selectedMainCategory === 'all' && selectedSubCategory !== 'all') {
+      return `Sub: ${subLabel}`;
+    }
+    return `${catLabel} • ${subLabel}`;
+  }, [selectedMainCategory, selectedSubCategory, productCategories]);
 
   // =========================================================================
-  // 2. KALKULASI KLASEMEN BERDASARKAN FILTER SUB-KATEGORI AKTIF
+  // 3. KALKULASI KLASEMEN BERDASARKAN FILTER KATEGORI & SUB-KATEGORI AKTIF
   // =========================================================================
   const fullLeaderboard: LeaderboardItem[] = useMemo(() => {
     const cardStatsByCollector = new Map<string, { cardPoints: number; gemMintCount: number }>();
@@ -157,10 +173,14 @@ export default function KlasemenPage() {
     cards.forEach((card) => {
       if (!card.collector_id) return;
 
-      if (selectedSubCategory !== 'all') {
-        const cardTcg = (card.tcg_type || '').trim().toUpperCase();
-        if (cardTcg !== selectedSubCategory.toUpperCase()) return;
-      }
+      // Filter terpusat: kategori utama & sub-kategori
+      const isMatch = matchItemCategory(
+        card.tcg_type,
+        selectedMainCategory,
+        selectedSubCategory,
+        productCategories
+      );
+      if (!isMatch) return;
 
       const current = cardStatsByCollector.get(card.collector_id) || {
         cardPoints: 0,
@@ -210,8 +230,14 @@ export default function KlasemenPage() {
         badgeColor,
       };
     });
-  }, [collectors, cards, selectedSubCategory]);
+  }, [collectors, cards, selectedMainCategory, selectedSubCategory, productCategories]);
 
+  // Top 3 Kolektor untuk Highlight Cards
+  const topThree = useMemo(() => {
+    return fullLeaderboard.slice(0, 3);
+  }, [fullLeaderboard]);
+
+  // Filter pencarian username / display name
   const filteredLeaderboard = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return fullLeaderboard;
@@ -226,11 +252,14 @@ export default function KlasemenPage() {
     return filteredLeaderboard.slice(0, 10);
   }, [filteredLeaderboard]);
 
+  // Row Peringkat Saya: HANYA jika authUserId terautentikasi / user sudah login!
   const currentUserRankData = useMemo(() => {
-    if (fullLeaderboard.length === 0) return null;
-    const found = fullLeaderboard.find((item) => item.id === currentUserId || item.user_id === currentUserId);
-    return found || fullLeaderboard[11] || fullLeaderboard[0] || null;
-  }, [fullLeaderboard, currentUserId]);
+    if (!authUserId || fullLeaderboard.length === 0) return null;
+    const found = fullLeaderboard.find(
+      (item) => item.user_id === authUserId || item.id === authUserId
+    );
+    return found || null;
+  }, [fullLeaderboard, authUserId]);
 
   return (
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 pb-20 transition-colors duration-300">
@@ -261,70 +290,250 @@ export default function KlasemenPage() {
           </p>
         </div>
 
-        {/* SEARCH, DROPDOWN KATEGORI UTAMA, & SUB-KATEGORI DI SAMPINGNYA */}
-        <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xs">
+        {/* ========================================================================= */}
+        {/* KONTROL FILTER KATEGORI & SUB-KATEGORI TERPUSAT (RegistryCategoryFilter)  */}
+        {/* Dapat diaktifkan / dihapus pada halaman manapun dengan modular & aman      */}
+        {/* ========================================================================= */}
+        <RegistryCategoryFilter
+          selectedCategory={selectedMainCategory}
+          onCategoryChange={setSelectedMainCategory}
+          selectedSubType={selectedSubCategory}
+          onSubTypeChange={setSelectedSubCategory}
+          categories={productCategories}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Cari username kolektor..."
+        />
 
-          <div className="relative w-full lg:w-72">
-            <Search className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Cari username kolektor..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam placeholder-subtle-hitam focus:outline-none focus:border-red-500/60 transition-colors"
-            />
+        {/* ========================================================================= */}
+        {/* TOP 3 CARDS DI BAGIAN PALING ATAS (PODIUM JUARA 1, 2, DAN 3)              */}
+        {/* ========================================================================= */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line-putih-soft pb-3">
+            <div className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-amber-500" />
+              <h2 className="text-base sm:text-lg font-extrabold text-foreground-hitam">
+                Podium 3 Teratas Nasional
+              </h2>
+            </div>
+            <span className="text-[11px] font-bold text-accent bg-accent-soft border border-accent-border px-3 py-1 rounded-full w-fit">
+              Filter Aktif: {activeFilterLabel}
+            </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-
-            {/* Dropdown Kategori Utama */}
-            <div className="relative w-full sm:w-48">
-              <select
-                value={selectedMainCategory}
-                onChange={(e) => handleMainCategoryChange(e.target.value)}
-                className="w-full appearance-none bg-elevated-putih border border-line-putih rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-foreground-hitam focus:outline-none focus:border-red-500/60 transition-colors cursor-pointer"
-              >
-                <option value="all">Semua Kategori</option>
-                {productCategories.map((cat) => (
-                  <option key={cat.id} value={cat.slug}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-subtle-hitam absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-
-            {/* Tombol Sub-Kategori */}
-            <div className="flex items-center gap-1.5 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft overflow-x-auto scrollbar-thin scrollbar-thumb-red-600/35 w-full sm:w-auto max-w-xl">
-              <button
-                type="button"
-                onClick={() => setSelectedSubCategory('all')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedSubCategory === 'all' ? 'bg-red-600 text-white shadow-sm' : 'text-muted-hitam hover:text-foreground-hitam'
-                  }`}
-              >
-                Semua Sub
-              </button>
-
-              {availableSubCategories.map((subKey) => (
-                <button
-                  key={subKey}
-                  type="button"
-                  onClick={() => setSelectedSubCategory(subKey)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedSubCategory === subKey ? 'bg-red-600 text-white shadow-sm' : 'text-muted-hitam hover:text-foreground-hitam'
-                    }`}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-card-putih border border-line-putih rounded-3xl p-6 text-center space-y-4 animate-pulse shadow-xs"
                 >
-                  {formatLabel(subKey)}
-                </button>
+                  <div className="w-16 h-16 rounded-full bg-elevated-putih mx-auto" />
+                  <div className="h-4 bg-elevated-putih rounded w-1/2 mx-auto" />
+                  <div className="h-8 bg-elevated-putih rounded w-3/4 mx-auto" />
+                </div>
               ))}
             </div>
+          ) : topThree.length === 0 ? (
+            <div className="bg-card-putih border border-line-putih rounded-3xl p-8 text-center text-xs text-muted-hitam">
+              Belum ada data kolektor untuk kategori ini.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+              {/* KARTU JUARA 2 (PERAK - POSISI KIRI DI DESKTOP) */}
+              {topThree[1] && (
+                <div className="order-2 md:order-1 bg-gradient-to-b from-slate-200/50 via-card-putih to-card-putih dark:from-slate-800/40 dark:via-card-hitam dark:to-card-hitam border-2 border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col justify-between space-y-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+                      <Medal className="w-3.5 h-3.5" /> #2 JUARA 2
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-hitam uppercase">PERAK</span>
+                  </div>
 
-          </div>
+                  <Link
+                    href={`/set-registry/user/${encodeURIComponent(topThree[1].rawUsername)}`}
+                    className="flex flex-col items-center text-center space-y-3 group-hover:scale-[1.02] transition-transform"
+                    title={`Lihat Profil ${topThree[1].username}`}
+                  >
+                    <div className="relative">
+                      <CollectorAvatar
+                        avatarBg={topThree[1].avatarBg}
+                        username={topThree[1].rawUsername}
+                        sizeClass="w-16 h-16"
+                        textSizeClass="text-lg"
+                        shapeClass="rounded-full"
+                        borderClass="ring-4 ring-slate-300 dark:ring-slate-700 shadow-md"
+                      />
+                      <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-[10px] font-black flex items-center justify-center border border-white dark:border-black">
+                        2
+                      </span>
+                    </div>
 
+                    <div>
+                      <h3 className="text-base font-extrabold text-foreground-hitam group-hover:text-accent transition-colors flex items-center justify-center gap-1">
+                        {topThree[1].username}
+                        <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h3>
+                      {topThree[1].displayName && (
+                        <p className="text-xs text-subtle-hitam">{topThree[1].displayName}</p>
+                      )}
+                    </div>
+                  </Link>
+
+                  <div className="bg-elevated-putih border border-line-putih rounded-2xl p-4 text-center space-y-2">
+                    <div className="text-2xl font-black text-foreground-hitam font-mono">
+                      {topThree[1].totalPoints.toLocaleString('id-ID')} <span className="text-xs font-bold text-accent">PTS</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 text-xs text-muted-hitam pt-1 border-t border-line-putih-soft font-mono">
+                      <span>{topThree[1].completedSets} Set Selesai</span>
+                      <span>•</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">{topThree[1].gemMintCount} Gem 10</span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/set-registry/user/${encodeURIComponent(topThree[1].rawUsername)}`}
+                    className="w-full bg-elevated-putih hover:bg-card-putih border border-line-putih text-foreground-hitam font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    Buka Profil & Vault <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              )}
+
+              {/* KARTU JUARA 1 (EMAS - TENGAH DI DESKTOP DENGAN ELEVASI LEBIH TINGGI) */}
+              {topThree[0] && (
+                <div className="order-1 md:order-2 bg-gradient-to-b from-amber-500/15 via-card-putih to-card-putih dark:from-amber-500/20 dark:via-card-hitam dark:to-card-hitam border-2 border-amber-500/60 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-5 shadow-lg hover:shadow-xl transition-all relative overflow-hidden group md:-translate-y-2">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500 text-white shadow-sm">
+                      <Crown className="w-4 h-4" /> #1 JUARA 1 NASIONAL
+                    </span>
+                    <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">
+                      EMAS UTAMA
+                    </span>
+                  </div>
+
+                  <Link
+                    href={`/set-registry/user/${encodeURIComponent(topThree[0].rawUsername)}`}
+                    className="flex flex-col items-center text-center space-y-3 group-hover:scale-[1.02] transition-transform"
+                    title={`Lihat Profil ${topThree[0].username}`}
+                  >
+                    <div className="relative">
+                      <CollectorAvatar
+                        avatarBg={topThree[0].avatarBg}
+                        username={topThree[0].rawUsername}
+                        sizeClass="w-20 h-20"
+                        textSizeClass="text-2xl"
+                        shapeClass="rounded-full"
+                        borderClass="ring-4 ring-amber-500 shadow-xl"
+                      />
+                      <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-black flex items-center justify-center border-2 border-white dark:border-black shadow-md">
+                        1
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-black text-foreground-hitam group-hover:text-accent transition-colors flex items-center justify-center gap-1">
+                        {topThree[0].username}
+                        <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h3>
+                      {topThree[0].displayName && (
+                        <p className="text-xs text-subtle-hitam font-medium">{topThree[0].displayName}</p>
+                      )}
+                    </div>
+                  </Link>
+
+                  <div className="bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 rounded-2xl p-4 text-center space-y-2">
+                    <div className="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                      {topThree[0].totalPoints.toLocaleString('id-ID')} <span className="text-xs font-extrabold text-foreground-hitam">PTS</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 text-xs text-muted-hitam pt-1 border-t border-amber-500/20 font-mono">
+                      <span className="font-semibold">{topThree[0].completedSets} Set Selesai</span>
+                      <span>•</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-extrabold">
+                        {topThree[0].gemMintCount} Gem Mint 10
+                      </span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/set-registry/user/${encodeURIComponent(topThree[0].rawUsername)}`}
+                    className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md shadow-red-600/30 hover:scale-[1.01]"
+                  >
+                    Buka Profil & Vault Juara <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
+
+              {/* KARTU JUARA 3 (PERUNGGU - POSISI KANAN DI DESKTOP) */}
+              {topThree[2] && (
+                <div className="order-3 bg-gradient-to-b from-amber-700/15 via-card-putih to-card-putih dark:from-amber-700/20 dark:via-card-hitam dark:to-card-hitam border-2 border-amber-700/40 dark:border-amber-700/50 rounded-3xl p-6 flex flex-col justify-between space-y-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-700/20 text-amber-700 dark:text-amber-400 border border-amber-700/40">
+                      <Award className="w-3.5 h-3.5" /> #3 JUARA 3
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-hitam uppercase">PERUNGGU</span>
+                  </div>
+
+                  <Link
+                    href={`/set-registry/user/${encodeURIComponent(topThree[2].rawUsername)}`}
+                    className="flex flex-col items-center text-center space-y-3 group-hover:scale-[1.02] transition-transform"
+                    title={`Lihat Profil ${topThree[2].username}`}
+                  >
+                    <div className="relative">
+                      <CollectorAvatar
+                        avatarBg={topThree[2].avatarBg}
+                        username={topThree[2].rawUsername}
+                        sizeClass="w-16 h-16"
+                        textSizeClass="text-lg"
+                        shapeClass="rounded-full"
+                        borderClass="ring-4 ring-amber-700/40 shadow-md"
+                      />
+                      <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-700 text-white text-[10px] font-black flex items-center justify-center border border-white dark:border-black">
+                        3
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-base font-extrabold text-foreground-hitam group-hover:text-accent transition-colors flex items-center justify-center gap-1">
+                        {topThree[2].username}
+                        <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h3>
+                      {topThree[2].displayName && (
+                        <p className="text-xs text-subtle-hitam">{topThree[2].displayName}</p>
+                      )}
+                    </div>
+                  </Link>
+
+                  <div className="bg-elevated-putih border border-line-putih rounded-2xl p-4 text-center space-y-2">
+                    <div className="text-2xl font-black text-foreground-hitam font-mono">
+                      {topThree[2].totalPoints.toLocaleString('id-ID')} <span className="text-xs font-bold text-accent">PTS</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 text-xs text-muted-hitam pt-1 border-t border-line-putih-soft font-mono">
+                      <span>{topThree[2].completedSets} Set Selesai</span>
+                      <span>•</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">{topThree[2].gemMintCount} Gem 10</span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/set-registry/user/${encodeURIComponent(topThree[2].rawUsername)}`}
+                    className="w-full bg-elevated-putih hover:bg-card-putih border border-line-putih text-foreground-hitam font-bold text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    Buka Profil & Vault <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* TABEL UTAMA (TOP 10 + ROW PERINGKAT ANDA DI PALING BAWAH TABEL) */}
+        {/* ========================================================================= */}
+        {/* TABEL UTAMA (TOP 10 + ROW PERINGKAT SAYA HANYA JIKA SUDAH LOGIN)          */}
+        {/* ========================================================================= */}
         <div className="bg-card-putih border border-line-putih rounded-3xl overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-line-putih flex items-center justify-between bg-elevated-putih">
+          <div className="p-6 border-b border-line-putih flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-elevated-putih">
             <div className="flex items-center gap-2">
               <Award className="w-5 h-5 text-accent" />
               <h2 className="text-base font-extrabold text-foreground-hitam">Top 10 Peringkat Utama</h2>
@@ -343,6 +552,7 @@ export default function KlasemenPage() {
             <div className="py-20 text-center space-y-2 px-4">
               <Database className="w-8 h-8 text-subtle-hitam mx-auto" />
               <p className="text-sm font-bold text-foreground-hitam">Tidak ada kolektor yang ditemukan</p>
+              <p className="text-xs text-muted-hitam">Coba ubah filter kategori atau kata kunci pencarian.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -367,24 +577,29 @@ export default function KlasemenPage() {
                         </span>
                       </td>
                       <td className="py-4 px-6 font-sans font-bold text-foreground-hitam">
-                        <div className="flex items-center gap-3">
+                        {/* Navigasi Klik Profil ke Halaman Detail Kolektor */}
+                        <Link
+                          href={`/set-registry/user/${encodeURIComponent(row.rawUsername)}`}
+                          className="flex items-center gap-3 group/link hover:text-accent transition-colors"
+                          title={`Lihat profil ${row.username}`}
+                        >
                           <CollectorAvatar
                             avatarBg={row.avatarBg}
                             username={row.rawUsername}
                             sizeClass="w-10 h-10"
                             textSizeClass="text-sm"
                             shapeClass="rounded-full"
-                            borderClass="shadow-xs"
+                            borderClass="shadow-xs group-hover/link:ring-2 group-hover/link:ring-accent transition-all"
                           />
                           <div>
-                            <span className="block text-sm">{row.username}</span>
+                            <span className="block text-sm group-hover/link:underline">{row.username}</span>
                             {row.displayName && (
                               <span className="text-[11px] font-normal text-subtle-hitam block">
                                 {row.displayName}
                               </span>
                             )}
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="py-4 px-6 text-center text-muted-hitam font-mono">{row.completedSets} Set</td>
                       <td className="py-4 px-6 text-center text-amber-600 dark:text-amber-400 font-bold font-mono">
@@ -396,8 +611,12 @@ export default function KlasemenPage() {
                     </tr>
                   ))}
 
-                  {/* ROW KHUSUS: PERINGKAT ANDA DI PALING BAWAH TABEL */}
-                  {currentUserRankData && (
+                  {/* ========================================================================= */}
+                  {/* ROW KHUSUS: PERINGKAT SAYA                                                */}
+                  {/* HANYA MUNCUL KETIKA PENGGUNA SUDAH LOGIN (authUserId terautentikasi)      */}
+                  {/* JIKA BELUM LOGIN: ROW INI OTOMATIS TIDAK DITAMPILKAN SAMA SEKALI          */}
+                  {/* ========================================================================= */}
+                  {authUserId && currentUserRankData && (
                     <tr className="bg-red-500/5 dark:bg-red-500/10 border-t-2 border-red-500/30">
                       <td className="py-4 px-6 text-center">
                         <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-xl font-extrabold text-xs bg-red-600 text-white font-mono shadow-sm">
@@ -405,7 +624,11 @@ export default function KlasemenPage() {
                         </span>
                       </td>
                       <td className="py-4 px-6 font-sans font-bold text-foreground-hitam">
-                        <div className="flex items-center gap-3">
+                        <Link
+                          href={`/set-registry/user/${encodeURIComponent(currentUserRankData.rawUsername)}`}
+                          className="flex items-center gap-3 group/self hover:text-accent transition-colors"
+                          title="Lihat Profil Saya"
+                        >
                           <CollectorAvatar
                             avatarBg={currentUserRankData.avatarBg}
                             username={currentUserRankData.rawUsername}
@@ -415,7 +638,7 @@ export default function KlasemenPage() {
                           />
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="block text-sm">{currentUserRankData.username}</span>
+                              <span className="block text-sm group-hover/self:underline">{currentUserRankData.username}</span>
                               <span className="text-[10px] font-extrabold bg-red-600/20 text-red-500 border border-red-500/30 px-2 py-0.5 rounded-md">
                                 Peringkat Anda
                               </span>
@@ -424,7 +647,7 @@ export default function KlasemenPage() {
                               {currentUserRankData.displayName}
                             </span>
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="py-4 px-6 text-center text-muted-hitam font-mono">{currentUserRankData.completedSets} Set</td>
                       <td className="py-4 px-6 text-center text-amber-600 dark:text-amber-400 font-bold font-mono">
@@ -438,6 +661,22 @@ export default function KlasemenPage() {
 
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Banner Ajakan Login untuk User yang Belum Terautentikasi */}
+          {!authUserId && !loading && (
+            <div className="p-4 bg-elevated-putih border-t border-line-putih flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-hitam">
+              <span className="flex items-center gap-2 text-center sm:text-left">
+                <Info className="w-4 h-4 text-accent shrink-0" />
+                Ingin melihat posisi peringkat portofolio Anda di klasemen nasional?
+              </span>
+              <Link
+                href="/login"
+                className="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-xs inline-flex items-center gap-1.5 shrink-0"
+              >
+                Masuk ke Akun ICS <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           )}
         </div>

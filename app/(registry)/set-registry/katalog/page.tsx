@@ -4,6 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import RegistryCategoryFilter, {
+  type ProductCategoryItem,
+} from '@/components/RegistryCategoryFilter';
 import {
   Layers,
   Search,
@@ -126,10 +129,11 @@ function getCategoryTheme(slug: string, index: number) {
 export default function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedSubType, setSelectedSubType] = useState<string>('all');
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [categories, setCategories] = useState<ProductCategoryRow[]>([]);
+  const [categories, setCategories] = useState<ProductCategoryItem[]>([]);
   const [cards, setCards] = useState<CardRegistryRow[]>([]);
 
   useEffect(() => {
@@ -275,14 +279,15 @@ export default function CatalogPage() {
         ...cat,
         subCategories: cat.subCategories.filter(
           (sub) =>
-            !query ||
-            sub.name.toLowerCase().includes(query) ||
-            sub.rawCode.toLowerCase().includes(query) ||
-            cat.title.toLowerCase().includes(query)
+            (selectedSubType === 'all' || sub.rawCode.toUpperCase() === selectedSubType.toUpperCase()) &&
+            (!query ||
+              sub.name.toLowerCase().includes(query) ||
+              sub.rawCode.toLowerCase().includes(query) ||
+              cat.title.toLowerCase().includes(query))
         ),
       }))
       .filter((cat) => cat.subCategories.length > 0);
-  }, [catalogData, selectedCategory, searchQuery]);
+  }, [catalogData, selectedCategory, selectedSubType, searchQuery]);
 
   return (
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 md:pt-52 pb-20 transition-colors duration-300">
@@ -304,46 +309,19 @@ export default function CatalogPage() {
           </p>
         </div>
 
-        {/* SEARCH & FILTER BAR */}
-        <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-center justify-between gap-4 shadow-xs">
-          <div className="relative w-full lg:w-80">
-            <Search className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Cari sub-kategori..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam placeholder-subtle-hitam focus:outline-none focus:border-red-500/60 transition-colors"
-            />
-          </div>
-
-          <div className="flex items-center gap-1.5 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft overflow-x-auto w-full lg:w-auto">
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('all')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === 'all'
-                ? 'bg-red-600 text-white shadow-sm'
-                : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-            >
-              Semua Kategori
-            </button>
-
-            {catalogData.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCategory(cat.slug)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === cat.slug
-                  ? 'bg-red-600 text-white shadow-sm'
-                  : 'text-muted-hitam hover:text-foreground-hitam'
-                  }`}
-              >
-                {cat.title}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* ========================================================================= */}
+        {/* KONTROL FILTER KATEGORI & SUB-KATEGORI TERPUSAT                           */}
+        {/* ========================================================================= */}
+        <RegistryCategoryFilter
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          selectedSubType={selectedSubType}
+          onSubTypeChange={setSelectedSubType}
+          categories={categories}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Cari sub-kategori atau franchise..."
+        />
 
         {/* CATEGORY SECTIONS */}
         {loading ? (

@@ -4,6 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import RegistryCategoryFilter, {
+  type ProductCategoryItem,
+  matchItemCategory,
+} from '@/components/RegistryCategoryFilter';
 import {
   BarChart3,
   Search,
@@ -87,12 +91,13 @@ function normalizeTcgCategory(tcgType: string | null): 'pokemon' | 'onepiece' | 
 
 export default function PopReportPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTcg, setSelectedTcg] = useState<'all' | 'pokemon' | 'onepiece' | 'yugioh'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedSubType, setSelectedSubType] = useState<string>('all');
 
   // State Data Database
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState<CardRegistryRow[]>([]);
-  const [, setCategories] = useState<ProductCategoryRow[]>([]);
+  const [categories, setCategories] = useState<ProductCategoryItem[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -251,19 +256,24 @@ export default function PopReportPage() {
       });
   }, [cards]);
 
-  // Filter berdasarkan tab TCG & pencarian
+  // Filter berdasarkan kategori, sub-kategori terpusat & pencarian
   const filteredPop = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return popData.filter((item) => {
-      const matchesTcg = selectedTcg === 'all' || item.tcgCategory === selectedTcg;
+      const matchesCategory = matchItemCategory(
+        item.rawTcgType,
+        selectedCategory,
+        selectedSubType,
+        categories
+      );
       const matchesSearch =
         !query ||
         item.cardName.toLowerCase().includes(query) ||
         item.setName.toLowerCase().includes(query) ||
         item.rawTcgType.toLowerCase().includes(query);
-      return matchesTcg && matchesSearch;
+      return matchesCategory && matchesSearch;
     });
-  }, [popData, selectedTcg, searchQuery]);
+  }, [popData, selectedCategory, selectedSubType, categories, searchQuery]);
 
   return (
     <div className="bg-surface text-foreground-hitam min-h-screen pt-28 pb-20 transition-colors duration-300">
@@ -334,57 +344,19 @@ export default function PopReportPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. SEARCH & FILTER TOOLBAR                                                */}
+        {/* 3. KONTROL FILTER KATEGORI & SUB-KATEGORI TERPUSAT                        */}
         {/* ========================================================================= */}
-        <div className="bg-card-putih border border-line-putih rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
-
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-subtle-hitam absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Cari nama kartu atau nama set TCG..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-elevated-putih border border-line-putih rounded-xl pl-10 pr-4 py-2.5 text-xs text-foreground-hitam placeholder-subtle-hitam focus:outline-none focus:border-red-500/60 transition-colors"
-            />
-          </div>
-
-          <div className="flex items-center gap-1 bg-elevated-putih p-1 rounded-xl border border-line-putih-soft overflow-x-auto w-full md:w-auto">
-            <button
-              type="button"
-              onClick={() => setSelectedTcg('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'all' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-            >
-              Semua TCG
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedTcg('pokemon')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'pokemon' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-            >
-              Pokémon Card
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedTcg('onepiece')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'onepiece' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-            >
-              One Piece Card
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedTcg('yugioh')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${selectedTcg === 'yugioh' ? 'bg-red-600 text-white' : 'text-muted-hitam hover:text-foreground-hitam'
-                }`}
-            >
-              Yu-Gi-Oh!
-            </button>
-          </div>
-
-        </div>
+        <RegistryCategoryFilter
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          selectedSubType={selectedSubType}
+          onSubTypeChange={setSelectedSubType}
+          categories={categories}
+          onCategoriesLoaded={setCategories}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Cari nama kartu, set, atau tipe TCG..."
+        />
 
         {/* ========================================================================= */}
         {/* 4. POPULATION REPORT TABLE                                                */}
